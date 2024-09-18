@@ -47,6 +47,7 @@ if ($stmt = $conn->prepare($query)) {
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f4f4f4;
+            overflow: hidden;
         }
         .reviewer-details {
             background-color: #fff;
@@ -72,7 +73,7 @@ if ($stmt = $conn->prepare($query)) {
             margin-bottom: 20px;
         }
         .card-body {
-            max-height: 400px;
+            max-height: 290px;
             overflow-y: auto;
         }
         .list-group-item {
@@ -158,7 +159,7 @@ if ($stmt = $conn->prepare($query)) {
             ?>
         <?php else: // Flashcard type ?>
             <?php
-            $flashcards_query = "SELECT * FROM flashcard WHERE reviewer_id = ? ORDER BY flashcard_id ASC";
+            $flashcards_query = "SELECT * FROM rw_flashcard WHERE reviewer_id = ? ORDER BY flashcard_id ASC";
             if ($stmt = $conn->prepare($flashcards_query)) {
                 $stmt->bind_param("i", $reviewer_id);
                 $stmt->execute();
@@ -303,15 +304,17 @@ if ($stmt = $conn->prepare($query)) {
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="manageFlashcardLabel">Add New Flashcard</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <form id="flashcard-frm">
                 <div class="modal-body">
                     <div id="flashcard_msg"></div>
+                    <input type="hidden" name="flashcard_id" id="flashcard_id"> 
+                    <input type="hidden" name="reviewer_id" value="<?php echo $reviewer_id; ?>" />
                     <div class="mb-3">
                         <label for="term" class="form-label">Term</label>
-                        <input type="hidden" name="reviewer_id" value="<?php echo $reviewer_id; ?>" />
-                        <input type="hidden" name="id" />
                         <input type="text" id="term" name="term" required class="form-control">
                     </div>
                     <div class="mb-3">
@@ -327,6 +330,7 @@ if ($stmt = $conn->prepare($query)) {
         </div>
     </div>
 </div>
+
 
 <script>
 $(document).ready(function() {
@@ -398,9 +402,9 @@ $(document).ready(function() {
     $('#question-frm').submit(function(e) {
         e.preventDefault();
         
-        var formData = new FormData(this);
         var questionType = $('#question_type').val();
-        
+        var formData = new FormData(this);
+
         // Validation logic
         var isValid = true;
         $('#' + questionType + '_options').find('input:visible, textarea:visible').each(function() {
@@ -419,24 +423,34 @@ $(document).ready(function() {
         
         // Additional validation for specific question types
         switch(questionType) {
-            case 'multiple_choice':
-            case 'checkbox':
-                if ($('#' + questionType + '_options .option-group').length < 2) {
-                    $('#msg').html('<div class="alert alert-danger">Please add at least two options.</div>');
-                    return;
-                }
-                if ($('#' + questionType + '_options input[name="' + (questionType === 'multiple_choice' ? 'is_right' : 'is_right[]') + '"]:checked').length === 0) {
-                    $('#msg').html('<div class="alert alert-danger">Please select ' + (questionType === 'multiple_choice' ? 'the correct answer.' : 'at least one correct answer.') + '</div>');
-                    return;
-                }
-                break;
-            case 'true_false':
-                if (!$('input[name="tf_answer"]:checked').val()) {
-                    $('#msg').html('<div class="alert alert-danger">Please select True or False.</div>');
-                    return;
-                }
-                break;
-        }
+                case 'multiple_choice':
+                    if ($('#' + questionType + '_options .option-group').length < 2) {
+                        $('#msg').html('<div class="alert alert-danger">Please add at least two options.</div>');
+                        return;
+                    }
+                    if ($('#' + questionType + '_options input[name="is_right"]:checked').length === 0) {
+                        $('#msg').html('<div class="alert alert-danger">Please select the correct answer.</div>');
+                        return;
+                    }
+                    break;
+                case 'checkbox':
+                    if ($('#' + questionType + '_options .option-group').length < 2) {
+                        $('#msg').html('<div class="alert alert-danger">Please add at least two options.</div>');
+                        return;
+                    }
+                    // Check if at least one checkbox is selected
+                    if ($('#' + questionType + '_options input[name="is_right[]"]:checked').length === 0) {
+                        $('#msg').html('<div class="alert alert-danger">Please select at least one correct answer.</div>');
+                        return;
+                    }
+                    break;
+                case 'true_false':
+                    if (!$('input[name="tf_answer"]:checked').val()) {
+                        $('#msg').html('<div class="alert alert-danger">Please select True or False.</div>');
+                        return;
+                    }
+                    break;
+            }
         
         // AJAX submission
         $.ajax({
@@ -465,37 +479,38 @@ $(document).ready(function() {
         });
     });
 
-    // Add Question/Flashcard Button
+    // Add/Edit Flashcard Button
     $(document).on('click', '#add_item_btn', function() {
         var reviewerType = '<?php echo $reviewer_type; ?>';
         if (reviewerType == '1') {
-            resetQuestionForm();
-            $('#manage_question').modal('show');
+            resetQuestionForm(); // Assuming this function is defined elsewhere
+            $('#manage_question').modal('show'); // Show question modal if applicable
         } else {
             clearFlashcardForm();
-            $('#manage_flashcard').modal('show');
+            $('#manage_flashcard').modal('show'); // Show flashcard modal
         }
     });
 
-    // Flashcard form submission
+    // Save flashcard
     $('#flashcard-frm').submit(function(e) {
         e.preventDefault();
         const formData = new FormData(this);
+        const flashcardId = $('#flashcard_id').val(); // Get the ID
 
         $.ajax({
             type: 'POST',
-            url: 'save_reviewer_flashcard.php',
+            url: flashcardId ? 'update_flashcard.php' : 'save_flashcard.php',
             data: formData,
             processData: false,
             contentType: false,
             dataType: 'json',
             success: function(response) {
-                if (response.status === 'success') {
+                if (response.success) {
                     $('#flashcard_msg').html('<div class="alert alert-success">' + response.message + '</div>');
                     setTimeout(function() {
                         $('#manage_flashcard').modal('hide');
                         location.reload();
-                    }, 1500);
+                    }, 800);
                 } else {
                     $('#flashcard_msg').html('<div class="alert alert-danger">' + response.message + '</div>');
                 }
@@ -507,42 +522,17 @@ $(document).ready(function() {
         });
     });
 
-    // Edit question button click handler
-    $(document).on('click', '.edit_question', function() {
-        const questionId = $(this).data('id');
-        
-        $.ajax({
-            type: 'GET',
-            url: 'get_reviewer_question.php',
-            data: { rw_question_id: questionId },
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    populateQuestionForm(response.data);
-                    $('#manageQuestionLabel').text('Edit Question');
-                    $('#manage_question').modal('show');
-                } else {
-                    alert('Error: ' + response.message);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX Error: " + status + ": " + error);
-                alert('An error occurred while fetching the question details. Please try again.');
-            }
-        });
-    });
-
-    // Edit flashcard button click handler
+    // Edit Flashcard Button Click Handler
     $(document).on('click', '.edit_flashcard', function() {
         const flashcardId = $(this).data('id');
         
         $.ajax({
             type: 'GET',
-            url: 'get_reviewer_flashcard.php',
+            url: 'get_flashcard.php',
             data: { flashcard_id: flashcardId },
             dataType: 'json',
             success: function(response) {
-                if (response.status === 'success') {
+                if (response.success) {
                     populateFlashcardForm(response.data);
                     $('#manage_flashcard').modal('show');
                 } else {
@@ -555,6 +545,21 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Function to populate flashcard form for editing
+    function populateFlashcardForm(data) {
+        $('#flashcard-frm')[0].reset(); // Clear the form first
+        $('#flashcard_id').val(data.flashcard_id); // Set the ID for editing
+        $('#term').val(data.term);
+        $('#definition').val(data.definition);
+        $('#manageFlashcardLabel').text('Edit Flashcard');
+    }
+
+    // Function to clear the flashcard form
+    function clearFlashcardForm() {
+        $('#flashcard-frm')[0].reset();
+        $('#manageFlashcardLabel').text('Add New Flashcard');
+    }
 
     // Remove question button click handler
     $(document).on('click', '.remove_question', function() {
@@ -587,13 +592,13 @@ $(document).ready(function() {
         if (confirm('Are you sure you want to delete this flashcard?')) {
             $.ajax({
                 type: 'POST',
-                url: 'delete_reviewer_flashcard.php',
+                url: 'delete_flashcard.php',
                 data: { flashcard_id: flashcardId },
                 dataType: 'json',
                 success: function(response) {
-                    if (response.status === 'success') {
+                    if (response.success) { 
                         alert(response.message);
-                        location.reload();
+                        location.reload(); 
                     } else {
                         alert('Error: ' + response.message);
                     }
@@ -606,11 +611,37 @@ $(document).ready(function() {
         }
     });
 
-    function populateQuestionForm(data) {
-        resetQuestionForm(); 
+    // Edit question button click handler
+    $(document).on('click', '.edit_question', function() {
+        const questionId = $(this).data('id');
         
+        $.ajax({
+            type: 'GET',
+            url: 'get_reviewer_question.php',
+            data: { rw_question_id: questionId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    populateQuestionForm(response.data);
+                    $('#manageQuestionLabel').text('Edit Question');
+                    $('#manage_question').modal('show');
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error: " + status + ": " + error);
+                alert('An error occurred while fetching the question details. Please try again.');
+            }
+        });
+    });
+
+    function populateQuestionForm(data) {
+    console.log('Question Data:', data);
+
+        $('#question-frm')[0].reset();
         $('#question_type').val(data.question_type).trigger('change');
-        $('input[name="id"]').val(data.rw_question_id);
+        $('input[name="id"]').val(data.question_id);
         $('#question').val(data.question);
         $('#points').val(data.total_points);
 
@@ -659,21 +690,6 @@ $(document).ready(function() {
                 }
                 break;
         }
-    }
-
-    // Function to populate flashcard form for editing
-    function populateFlashcardForm(data) {
-        $('#flashcard-frm')[0].reset();
-        $('#flashcard-frm [name="id"]').val(data.flashcard_id);
-        $('#flashcard-frm [name="term"]').val(data.term);
-        $('#flashcard-frm [name="definition"]').val(data.definition);
-        $('#manageFlashcardLabel').text('Edit Flashcard');
-    }
-
-    // Function to clear the flashcard form
-    function clearFlashcardForm() {
-        $('#flashcard-frm')[0].reset();
-        $('#manageFlashcardLabel').text('Add New Flashcard');
     }
 });
 </script>
