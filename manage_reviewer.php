@@ -73,7 +73,7 @@ if ($stmt = $conn->prepare($query)) {
             margin-bottom: 20px;
         }
         .card-body {
-            max-height: 290px;
+            max-height: 50vh;
             overflow-y: auto;
         }
         .list-group-item {
@@ -138,6 +138,7 @@ if ($stmt = $conn->prepare($query)) {
                     while ($row = $questions_result->fetch_assoc()) {
                         echo '<li class="list-group-item">';
                         echo htmlspecialchars($row['question']);
+                        echo '<p><strong>Points:</strong> ' . htmlspecialchars($row['total_points']) . '</p>';
                         echo '<div class="float-right">';
                         echo '<button class="btn btn-sm btn-outline-primary edit_question me-2" data-id="' . htmlspecialchars($row['rw_question_id']) . '"><i class="fa fa-edit"></i></button>';
                         echo '<button class="btn btn-sm btn-outline-danger remove_question" data-id="' . htmlspecialchars($row['rw_question_id']) . '"><i class="fa fa-trash"></i></button>';
@@ -337,7 +338,7 @@ $(document).ready(function() {
     // Function to reset the question form
     function resetQuestionForm() {
         $('#question-frm')[0].reset();
-        $('input[name="id"]').val(''); // Clear the hidden id field
+        $('input[name="id"]').val(''); 
         $('#question_type').val('').trigger('change');
         $('.question-type-options').hide();
         $('#multiple_choice_options .form-group, #checkbox_options .form-group').empty();
@@ -403,7 +404,68 @@ $(document).ready(function() {
         e.preventDefault();
         
         var questionType = $('#question_type').val();
-        var formData = new FormData(this);
+            var formData = new FormData(this);
+
+            if (!formData.get('id')) {
+                formData.delete('id');
+            }
+
+            // Clear and append options correctly for the selected question type
+            formData.delete('question_opt[]');
+            formData.delete('is_right[]');
+            formData.delete('is_right');
+
+            // Append option data for multiple_choice or checkbox types
+            $('#' + questionType + '_options .option-group').each(function(index) {
+                var optionText = $(this).find('textarea[name="question_opt[]"]').val();
+                if (optionText && optionText.trim() !== '') {
+                    formData.append('question_opt[]', optionText.trim());
+
+                    if (questionType === 'multiple_choice') {
+                        if ($(this).find('input[name="is_right"]:checked').length > 0) {
+                            formData.append('is_right', index);
+                        }
+                    } else if (questionType === 'checkbox') {
+                        if ($(this).find('input[name="is_right[]"]:checked').length > 0) {
+                            formData.append('is_right[]', index);
+                        }
+                    }
+                }
+            });
+
+            // Additional validation for specific question types
+            if (!validateForm(questionType)) return;
+
+            // AJAX submission
+            $.ajax({
+            type: 'POST',
+            url: 'save_reviewer_question.php',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#msg').html('<div class="alert alert-success">' + response.message + '</div>');
+                    $('#save_question_btn').prop('disabled', true).text('Saved');
+                    setTimeout(function() {
+                        $('#manage_question').modal('hide');
+                        location.reload();
+                    }, 1000);
+                } else {
+                    $('#msg').html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error: " + status + ": " + error);
+                $('#msg').html('<div class="alert alert-danger">An error occurred while saving the question. Please try again.</div>');
+            }
+        });
+    });
+    
+    // Form validation function
+    function validateForm(questionType) {
+    var isValid = true;
 
         // Validation logic
         var isValid = true;
@@ -418,7 +480,7 @@ $(document).ready(function() {
         
         if (!isValid) {
             $('#msg').html('<div class="alert alert-danger">Please fill out all required fields.</div>');
-            return;
+            return false;
         }
         
         // Additional validation for specific question types
@@ -451,40 +513,16 @@ $(document).ready(function() {
                     }
                     break;
             }
+        return true;
+        }
         
-        // AJAX submission
-        $.ajax({
-            type: 'POST',
-            url: 'save_reviewer_question.php',
-            data: formData,
-            processData: false,
-            contentType: false,
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'success') {
-                    $('#msg').html('<div class="alert alert-success">' + response.message + '</div>');
-                    $('#save_question_btn').prop('disabled', true).text('Saved');
-                    setTimeout(function() {
-                        $('#manage_question').modal('hide');
-                        location.reload();
-                    }, 1000);
-                } else {
-                    $('#msg').html('<div class="alert alert-danger">' + response.message + '</div>');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX Error: " + status + ": " + error);
-                $('#msg').html('<div class="alert alert-danger">An error occurred while saving the question. Please try again.</div>');
-            }
-        });
-    });
 
     // Add/Edit Flashcard Button
     $(document).on('click', '#add_item_btn', function() {
         var reviewerType = '<?php echo $reviewer_type; ?>';
         if (reviewerType == '1') {
-            resetQuestionForm(); // Assuming this function is defined elsewhere
-            $('#manage_question').modal('show'); // Show question modal if applicable
+            resetQuestionForm(); 
+            $('#manage_question').modal('show'); 
         } else {
             clearFlashcardForm();
             $('#manage_flashcard').modal('show'); // Show flashcard modal
@@ -495,7 +533,7 @@ $(document).ready(function() {
     $('#flashcard-frm').submit(function(e) {
         e.preventDefault();
         const formData = new FormData(this);
-        const flashcardId = $('#flashcard_id').val(); // Get the ID
+        const flashcardId = $('#flashcard_id').val(); 
 
         $.ajax({
             type: 'POST',
@@ -655,7 +693,11 @@ $(document).ready(function() {
                             var newOption = `
                                 <div class="option-group d-flex align-items-center mb-2">
                                     <textarea rows="2" name="question_opt[]" class="form-control flex-grow-1 mr-2" required>${option.option_txt}</textarea>
-                                    <label><input type="${data.question_type === 'multiple_choice' ? 'radio' : 'checkbox'}" name="${data.question_type === 'multiple_choice' ? 'is_right' : 'is_right[]'}" value="${index}" ${option.is_right ? 'checked' : ''} required></label>
+                                    <label>
+                                        <input type="${data.question_type === 'multiple_choice' ? 'radio' : 'checkbox'}" 
+                                            name="${data.question_type === 'multiple_choice' ? 'is_right' : 'is_right[]'}" 
+                                            value="${index}" ${option.is_right == '1' ? 'checked' : ''}>
+                                    </label>
                                     <button type="button" class="btn btn-sm btn-danger ml-2 remove-option">Remove</button>
                                 </div>
                             `;

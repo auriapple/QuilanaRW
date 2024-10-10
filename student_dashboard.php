@@ -23,18 +23,20 @@ if (!isset($_SESSION['login_user_type'])) {
     <body>
         <?php include 'nav_bar.php'; ?>
         <div class="content-wrapper dashboard-container">
+            <!-- Summary -->
             <div class="dashboard-summary">
                 <h1> Welcome, <?php echo $firstname ?> </h1>
                 <h2> Summary </h2>
                 <div class="cards">
                     <!-- Total Number of Classes -->
                     <div class="card" style="background-color: #FFE2E5;">
-                        <img class="icons" src="image/DashboardCoursesIcon.png" alt="Courses Icon">
+                        <img class="icons" src="image/DashboardCoursesIcon.png" alt="Classes Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalClasses 
                                                 FROM class c
                                                 JOIN student_enrollment s ON c.class_id = s.class_id
-                                                WHERE s.student_id = '".$_SESSION['login_id']."'");
+                                                WHERE s.student_id = '".$_SESSION['login_id']."'
+                                                AND s.status = '1'");
                         $resTotalClasses = $result->fetch_assoc();
                         $totalClasses = $resTotalClasses['totalClasses'];
                         ?>
@@ -44,8 +46,8 @@ if (!isset($_SESSION['login_user_type'])) {
                         </div>
                     </div>
                     <!-- Total Number of Quizzes -->
-                    <div class="card"> 
-                        <img class="icons" src="image/DashboardClassesIcon.png" alt="Classes Icon">
+                    <div class="card" style="background-color: #FADEFF"> 
+                        <img class="icons" src="image/DashboardClassesIcon.png" alt="Quizzes Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalQuizzes 
                                                 FROM student_submission s
@@ -63,7 +65,7 @@ if (!isset($_SESSION['login_user_type'])) {
                     </div>
                     <!-- Total Number of Exams -->
                     <div class="card" style="background-color: #DCE1FC;"> 
-                        <img class="icons" src="image/DashboardExamsIcon.png" alt="Classes Icon">
+                        <img class="icons" src="image/DashboardExamsIcon.png" alt="Exams Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalExams
                                                 FROM student_submission s
@@ -82,65 +84,68 @@ if (!isset($_SESSION['login_user_type'])) {
                 </div>
             </div>
 
-            <div class="dashboard-requests">
+            <!-- Recents -->
+            <div class="recent-assessments">
                 <h1> Recents </h1>
-                <?php
-                $result = $conn->query("
-                    SELECT a.assessment_name, a.assessment_type, c.class_name, c.subject, ss.date_taken
-                    FROM student_results sr
-                    JOIN student_submission ss ON sr.submission_id = ss.submission_id
-                    JOIN assessment a ON sr.assessment_id = a.assessment_id
-                    JOIN administer_assessment aa ON a.assessment_id = aa.assessment_id
-                    JOIN class c ON aa.class_id = c.class_id
-                    WHERE ss.student_id = '".$_SESSION['login_id']."'
-                    ORDER BY ss.date_taken DESC
-                    LIMIT 5
-                ");
+                <div class="recent-scrollable">
+                    <?php
+                    $result = $conn->query("
+                        SELECT a.assessment_name, a.assessment_type, c.class_name, c.subject, ss.date_taken
+                        FROM student_results sr
+                        JOIN student_submission ss ON sr.submission_id = ss.submission_id
+                        JOIN assessment a ON sr.assessment_id = a.assessment_id
+                        JOIN administer_assessment aa ON a.assessment_id = aa.assessment_id
+                        JOIN class c ON aa.class_id = c.class_id
+                        WHERE ss.student_id = '".$_SESSION['login_id']."'
+                        ORDER BY ss.date_taken DESC
+                    ");
 
-                $currentDate = '';
+                    $currentDate = '';
 
-                if ($result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                        $assessmentName = htmlspecialchars($row['assessment_name']);
-                        $assessmentType = htmlspecialchars($row['assessment_type']);
-                        $className = htmlspecialchars($row['class_name']);
-                        $subjectName = htmlspecialchars($row['subject']);
-                        $dateTaken = date("Y-m-d", strtotime($row['date_taken']));
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $assessmentName = htmlspecialchars($row['assessment_name']);
+                            $assessmentType = htmlspecialchars($row['assessment_type']);
+                            $className = htmlspecialchars($row['class_name']);
+                            $subjectName = htmlspecialchars($row['subject']);
+                            $dateTaken = date("Y-m-d", strtotime($row['date_taken']));
 
-                        // Divider by date_taken
-                        if ($dateTaken !== $currentDate) {
-                            $currentDate = $dateTaken;
-                            echo "<div class='assessment-separator'>";
-                            echo "<span class='date'> " . $currentDate . "</span>";
-                            echo "<hr class='separator-line'>";
-                            echo "</div>";
-                        }
+                            // Divider by date_taken
+                            if ($dateTaken !== $currentDate) {
+                                $currentDate = $dateTaken;
+                                echo "<div class='assessment-separator'>";
+                                echo "<span class='date'> " . $currentDate . "</span>";
+                                echo "<hr class='separator-line'>";
+                                echo "</div>";
+                            }
 
-                        // Setting the background color and icon based on assessment type
-                        $bgColor = ($assessmentType == 1) ? '#FADEFF' : '#DCE1FC';
-                        $icon = ($assessmentType == 1) ? 'DashboardClassesIcon.png' : 'DashboardExamsIcon.png';
+                            // Setting the background color and icon based on assessment type
+                            $bgColor = ($assessmentType == 1) ? '#FADEFF' : '#DCE1FC';
+                            $icon = ($assessmentType == 1) ? 'DashboardClassesIcon.png' : 'DashboardExamsIcon.png';
 
-                        // Display the card with proper icon and background color
-                        echo "<div id='recents' class='cards'>";
-                            echo "<div id='recent-card' class='card' style='background-color: {$bgColor};'>";
-                                echo "<div id='recent-data' class='card-data'>";
-                                    echo "<div class='recent-icon'>";
-                                        echo "<img class='icons' src='image/{$icon}' alt='" . (($assessmentType == 1) ? 'Quiz' : 'Exam') . " Icon'>";
-                                    echo "</div>";
-                                    echo "<div class='recent-details'>";
-                                        echo "<h3>{$assessmentName}</h3>";
-                                        echo "<label>{$className} ({$subjectName})</label>";
+                            // Display the card with proper icon and background color
+                            echo "<div id='recents' class='cards'>";
+                                echo "<div id='recent-card' class='card' style='background-color: {$bgColor};'>";
+                                    echo "<div id='recent-data' class='card-data'>";
+                                        echo "<div class='recent-icon'>";
+                                            echo "<img class='icons' src='image/{$icon}' alt='" . (($assessmentType == 1) ? 'Quiz' : 'Exam') . " Icon'>";
+                                        echo "</div>";
+                                        echo "<div class='recent-details'>";
+                                            echo "<h3>{$assessmentName}</h3>";
+                                            echo "<label>{$className} ({$subjectName})</label>";
+                                        echo "</div>";
                                     echo "</div>";
                                 echo "</div>";
                             echo "</div>";
-                        echo "</div>";
-                    }
-                    } else {
-                        echo "<p class='no-assessments'>No recent submissions.</p>";
-                    }
-                ?>
+                        }
+                        } else {
+                            echo "<p class='no-assessments'>No recent assessments.</p>";
+                        }
+                    ?>
+                </div>
             </div>
 
+            <!-- Calendar -->
             <div class="dashboard-calendar">
                 <div class="wrapper">
                     <header>

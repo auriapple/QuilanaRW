@@ -54,7 +54,14 @@
                             <div class="course-actions">
                                 <a class="tertiary-button" id="view_reviewer_details" 
                                 href="manage_reviewer.php?reviewer_id=<?php echo $reviewer_id ?>" type="button"> Manage</a>                                
-                                <button class="main-button" id="take_reviewer" data-id="<?php echo $row['reviewer_id']; ?>" data-type="<?php echo $row['reviewer_type']; ?>" type="button">Take Reviewer</button>
+                                <button class="main-button" 
+                                    id="take_reviewer" 
+                                    data-id="<?php echo $row['reviewer_id']; ?>" 
+                                    data-type="<?php echo $row['reviewer_type']; ?>" 
+                                    type="button" 
+                                    onclick="window.location.href='take_reviewer.php?reviewer_id=<?php echo $row['reviewer_id']; ?>&reviewer_type=<?php echo $row['reviewer_type']; ?>'">
+                                    Take Reviewer
+                                </button>
                             </div>
                         </div>
                     </div>

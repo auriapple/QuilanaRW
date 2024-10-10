@@ -1,192 +1,152 @@
 <?php
-// Database connection
-require 'db_connect.php';
 session_start();
+include('db_connect.php');
 
-function check_correctness($question_id, $answer_value, $question_type, $conn) {
-    $points_query = $conn->query("SELECT total_points FROM questions WHERE question_id = '$question_id'");
-    if ($points_query && $points_query->num_rows > 0) {
-        $points_data = $points_query->fetch_assoc();
-        $total_points = $points_data['total_points'];
-    } else {
-        return 0; // No points if question is not found
-    }
-
-    $answer_value = strtolower(trim($answer_value)); // Normalize input for comparison
-
-    if ($question_type == 1 || $question_type == 3) {
-        // Multiple Choice or True/False
-        $correct_answer_query = $conn->query("SELECT option_txt FROM question_options WHERE question_id = '$question_id' AND is_right = 1");
-        if ($correct_answer_query && $correct_answer_query->num_rows > 0) {
-            $correct_answer_data = $correct_answer_query->fetch_assoc();
-            $correct_option_txt = strtolower(trim($correct_answer_data['option_txt']));
-            return ($answer_value == $correct_option_txt) ? 1 : 0;
-        }
-        return 0;
-
-    } elseif ($question_type == 2) {
-        // Multiple Selection
-        $correct_answers_query = $conn->query("SELECT option_txt FROM question_options WHERE question_id = '$question_id' AND is_right = 1");
-        $correct_answers = [];
-        while ($row = $correct_answers_query->fetch_assoc()) {
-            $correct_answers[] = strtolower(trim($row['option_txt']));
-        }
-
-        $selected_answers = is_array($answer_value) ? array_map('strtolower', array_map('trim', $answer_value)) : [strtolower(trim($answer_value))];
-        return (in_array($answer_value, $correct_answers)) ? 1 : 0;
-
-    } elseif ($question_type == 4 || $question_type == 5) {
-        // Fill-in-the-blank or Identification (text input)
-        $correct_text_query = $conn->query("SELECT identification_answer FROM question_identifications WHERE question_id = '$question_id'");
-        if ($correct_text_query && $correct_text_query->num_rows > 0) {
-            $correct_text_data = $correct_text_query->fetch_assoc();
-            $correct_text = strtolower(trim($correct_text_data['identification_answer']));
-            return ($answer_value == $correct_text) ? 1 : 0;
-        }
-        return 0;
-    }
-
-    return 0; // Default to incorrect if no condition matches
-}
-
-
-// Check if form was submitted
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $assessment_id = $conn->real_escape_string($_POST['assessment_id']);
-    $student_id = $_SESSION['login_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $student_id = $_SESSION['login_id'];  
+    $reviewer_id = intval($_POST['reviewer_id']); 
     $answers = $_POST['answers'];
-    $date_taken = date('Y-m-d H:i:s');
+    $total_score = 0;
+    $total_points = 0;
 
-    // Check if the student has already submitted this assessment
-    $check_submission_query = $conn->query("SELECT submission_id FROM student_submission WHERE assessment_id = '$assessment_id' AND student_id = '$student_id'");
-    if ($check_submission_query->num_rows > 0) {
-        die("You have already submitted this assessment.");
-    }
-
-    // Get the class_id for the student
-    $class_query = $conn->query("SELECT class_id FROM student_enrollment WHERE student_id = '$student_id' AND status = 1");
-    if ($class_query->num_rows == 0) {
-        die("Student is not enrolled in any active class.");
-    }
-    $class_data = $class_query->fetch_assoc();
-    $class_id = $class_data['class_id'];
-
-    // Start transaction
     $conn->begin_transaction();
 
     try {
-        // Insert submission details
-        $insert_submission_query = "INSERT INTO student_submission (assessment_id, student_id, student_score, status, date_taken) 
-                                    VALUES ('$assessment_id', '$student_id', 0, 0, '$date_taken')";
-        $conn->query($insert_submission_query);
-        $submission_id = $conn->insert_id;
+        $submission_stmt = $conn->prepare("INSERT INTO rw_student_submission (student_id, reviewer_id, student_score, date_taken) VALUES (?, ?, 0, NOW())");
+        $submission_stmt->bind_param("ii", $student_id, $reviewer_id);
+        $submission_stmt->execute();
+        $rw_submission_id = $conn->insert_id; 
 
-        $total_score = 0;
-        $total_questions = 0;
+        foreach ($answers as $question_id => $user_answer) {
+            $question_stmt = $conn->prepare("SELECT question_type, total_points FROM rw_questions WHERE rw_question_id = ?");
+            $question_stmt->bind_param("i", $question_id);
+            $question_stmt->execute();
+            $question_result = $question_stmt->get_result();
 
-        // Process answers
-        foreach ($answers as $question_id => $answer) {
-            $question_query = $conn->query("SELECT ques_type, total_points FROM questions WHERE question_id = '" . $conn->real_escape_string($question_id) . "'");
-            $question_data = $question_query->fetch_assoc();
-            $question_type = $question_data['ques_type'];
-            $question_points = $question_data['total_points'];
+            if ($question_result->num_rows > 0) {
+                $question = $question_result->fetch_assoc();
+                $question_type = $question['question_type'];
+                $question_points = $question['total_points'];
+                $total_points += $question_points; 
 
-            $total_questions += $question_points;
-
-            if ($question_type == 1 || $question_type == 3) {
-                // Multiple Choice or True/False
-                $option_query = $conn->query("SELECT option_id FROM question_options WHERE question_id = '" . $conn->real_escape_string($question_id) . "' AND option_txt = '" . $conn->real_escape_string($answer) . "'");
-                $option_data = $option_query->fetch_assoc();
-                $option_id = $option_data['option_id'];
-                $is_right = check_correctness($question_id, $answer, $question_type, $conn);
-                $total_score += $is_right ? $question_points : 0;
-
-                $insert_answer_query = "INSERT INTO student_answer (student_id, answer_text, submission_id, question_id, option_id, is_right) 
-                                        VALUES ('$student_id', '" . $conn->real_escape_string($answer) . "', '$submission_id', '" . $conn->real_escape_string($question_id) . "', '$option_id', '$is_right')";
-                $conn->query($insert_answer_query);
-
-            } elseif ($question_type == 2) {
-                // Multiple Selection
-                $answer_score = 0;
-                $selected_answers = is_array($answer) ? $answer : [$answer];
-                
-                // Calculate correct answers and scoring
-                foreach ($selected_answers as $choice) {
-                    $choice = strtolower(trim($choice));
-                    $option_query = $conn->query("SELECT option_id, is_right FROM question_options WHERE question_id = '" . $conn->real_escape_string($question_id) . "' AND option_txt = '" . $conn->real_escape_string($choice) . "'");
-                    if ($option_query && $option_query->num_rows > 0) {
-                        $option_data = $option_query->fetch_assoc();
-                        $option_id = $option_data['option_id'];
-                        $is_right = $option_data['is_right'];
-
-                        // Insert answer
-                        $insert_answer_query = "INSERT INTO student_answer (student_id, answer_text, submission_id, question_id, option_id, is_right) 
-                                                VALUES ('$student_id', '" . $conn->real_escape_string($choice) . "', '$submission_id', '" . $conn->real_escape_string($question_id) . "', '$option_id', '$is_right')";
-                        $conn->query($insert_answer_query);
-
-                        // Update score based on correctness
-                        if ($is_right) {
-                            $answer_score += 1; // Increment score for correct option
-                        }
+                // Handle different question types
+                if ($question_type == 1 || $question_type == 3) { 
+                    // Multiple Choice or True/False
+                    if (is_array($user_answer)) {
+                        $user_answer = implode(',', $user_answer); // Handle if multiple options are selected
                     }
+
+                    $opt_query = $conn->prepare("SELECT rw_option_id, is_right FROM rw_question_opt WHERE rw_question_id = ? AND LOWER(TRIM(option_text)) = LOWER(TRIM(?))");
+                    $opt_query->bind_param("is", $question_id, $user_answer);
+                    $opt_query->execute();
+                    $opt_result = $opt_query->get_result();
+
+                    if ($opt_result->num_rows > 0) {
+                        $option = $opt_result->fetch_assoc();
+                        $is_right = $option['is_right'];
+                        $option_id = $option['rw_option_id'];
+                        if ($is_right == 1) {
+                            $total_score += $question_points;
+                        }
+                    } else {
+                        $option_id = NULL;
+                        $is_right = 0;
+                    }
+
+                    // Insert into rw_answer
+                    $insert_answer_stmt = $conn->prepare("INSERT INTO rw_answer (student_id, rw_submission_id, rw_question_id, rw_option_id, answer_text, is_right) VALUES (?, ?, ?, ?, ?, ?)");
+                    $insert_answer_stmt->bind_param("iiiiis", $student_id, $rw_submission_id, $question_id, $option_id, $user_answer, $is_right);
+                    $insert_answer_stmt->execute();
+
+                } elseif ($question_type == 2) { 
+                    // Multiple Selection
+                    $selected_answers = is_array($user_answer) ? array_map('strtolower', array_map('trim', $user_answer)) : [strtolower(trim($user_answer))];
+                    $correct_answers_query = $conn->prepare("SELECT option_text FROM rw_question_opt WHERE rw_question_id = ? AND is_right = 1");
+                    $correct_answers_query->bind_param("i", $question_id);
+                    $correct_answers_query->execute();
+                    $correct_answers_result = $correct_answers_query->get_result();
+
+                    $correct_answers = [];
+                    while ($row = $correct_answers_result->fetch_assoc()) {
+                        $correct_answers[] = strtolower(trim($row['option_text']));
+                    }
+
+                    // Compare answers
+                    $is_correct = (count($selected_answers) == count($correct_answers) && !array_diff($selected_answers, $correct_answers));
+                    
+                    // Insert each selected answer into rw_answer
+                    foreach ($selected_answers as $choice) {
+                        $opt_query = $conn->prepare("SELECT rw_option_id FROM rw_question_opt WHERE rw_question_id = ? AND LOWER(TRIM(option_text)) = LOWER(TRIM(?))");
+                        $opt_query->bind_param("is", $question_id, $choice);
+                        $opt_query->execute();
+                        $option_data = $opt_query->get_result()->fetch_assoc();
+                        $option_id = $option_data['rw_option_id'] ?? NULL;
+
+                        $is_right = in_array($choice, $correct_answers) ? 1 : 0;
+
+                        $insert_answer_stmt = $conn->prepare("INSERT INTO rw_answer (student_id, rw_submission_id, rw_question_id, rw_option_id, answer_text, is_right) VALUES (?, ?, ?, ?, ?, ?)");
+                        $insert_answer_stmt->bind_param("iiiiis", $student_id, $rw_submission_id, $question_id, $option_id, $choice, $is_right);
+                        $insert_answer_stmt->execute();
+                    }
+
+                    if ($is_correct) {
+                        $total_score += $question_points; // All answers were correct
+                    }
+
+                } elseif ($question_type == 4 || $question_type == 5) {
+                    // Fill in the blank (Type 4) or Identification (Type 5)
+                    $ident_query = $conn->prepare("SELECT identification_answer FROM rw_question_identifications WHERE rw_question_id = ?");
+                    $ident_query->bind_param("i", $question_id);
+                    $ident_query->execute();
+                    $ident_result = $ident_query->get_result();
+
+                    if ($ident_result->num_rows > 0) {
+                        $correct_answer = strtolower(trim($ident_result->fetch_assoc()['identification_answer']));
+                        $is_right = (strtolower(trim($user_answer)) == $correct_answer) ? 1 : 0;
+                    } else {
+                        $is_right = 0;
+                    }
+
+                    // Calculate score
+                    if ($is_right == 1) {
+                        $total_score += $question_points;
+                    }
+
+                    // Insert answer into rw_answer
+                    $insert_answer_stmt = $conn->prepare("INSERT INTO rw_answer (student_id, rw_submission_id, rw_question_id, answer_text, is_right) VALUES (?, ?, ?, ?, ?)");
+                    $insert_answer_stmt->bind_param("iiiis", $student_id, $rw_submission_id, $question_id, $user_answer, $is_right);
+                    $insert_answer_stmt->execute();
                 }
-
-                // Calculate total score for multiple selection (partial credit)
-                $total_options_query = $conn->query("SELECT COUNT(*) as total FROM question_options WHERE question_id = '" . $conn->real_escape_string($question_id) . "'");
-                $total_options_data = $total_options_query->fetch_assoc();
-                $total_options = $total_options_data['total'];
-
-                $total_correct_options_query = $conn->query("SELECT COUNT(*) as total FROM question_options WHERE question_id = '" . $conn->real_escape_string($question_id) . "' AND is_right = 1");
-                $total_correct_options_data = $total_correct_options_query->fetch_assoc();
-                $total_correct_options = $total_correct_options_data['total'];
-
-                $total_score += ($answer_score / $total_correct_options) * $question_points;
-
-            } elseif ($question_type == 4 || $question_type == 5) {
-                // Fill-in-the-blank or identification
-                $is_right = check_correctness($question_id, $answer, $question_type, $conn);
-                $total_score += $is_right ? $question_points : 0;
-
-                $insert_answer_query = "INSERT INTO student_answer (student_id, answer_text, submission_id, question_id, is_right) 
-                                        VALUES ('$student_id', '" . $conn->real_escape_string($answer) . "', '$submission_id', '" . $conn->real_escape_string($question_id) . "', '$is_right')";
-                $conn->query($insert_answer_query);
             }
         }
 
-        // Update student_submission with the final score
-        $update_submission_query = "UPDATE student_submission SET student_score = '$total_score', status = 1 WHERE submission_id = '$submission_id'";
-        $conn->query($update_submission_query);
+        // Update the student's submission score
+        $update_score_stmt = $conn->prepare("UPDATE rw_student_submission SET student_score = ? WHERE rw_submission_id = ?");
+        $update_score_stmt->bind_param("ii", $total_score, $rw_submission_id);
+        $update_score_stmt->execute();
 
-        // Calculate remarks
-        $pass_mark = 0.5 * $total_questions;
-        $remarks = ($total_score >= $pass_mark) ? 1 : 0;
+        // Insert the result into the rw_student_results table
+        $result_stmt = $conn->prepare("INSERT INTO rw_student_results (student_id, reviewer_id, rw_submission_id, student_score, date_taken) VALUES (?, ?, ?, ?, CURDATE())");
+        $result_stmt->bind_param("iiii", $student_id, $reviewer_id, $rw_submission_id, $total_score);
+        $result_stmt->execute();
 
-        // Get assessment mode
-        $assessment_mode_query = $conn->query("SELECT assessment_mode FROM assessment WHERE assessment_id = '$assessment_id'");
-        $assessment_mode_data = $assessment_mode_query->fetch_assoc();
-        $assessment_mode = $assessment_mode_data['assessment_mode'];
-
-        $rank = ($assessment_mode == 1) ? NULL : 0;
-
-        // Insert results into student_results table
-        $insert_results_query = "
-            INSERT INTO student_results (assessment_id, student_id, class_id, items, score, remarks, rank)
-            VALUES ('$assessment_id', '$student_id', '$class_id', '$total_questions', '$total_score', '$remarks', " . ($rank === NULL ? "NULL" : "'$rank'") . ")
-        ";
-        $conn->query($insert_results_query);
-
-        // Commit transaction
+        // Commit the transaction
         $conn->commit();
 
-        echo "Assessment submitted successfully. Your score is $total_score out of $total_questions.";
-    } catch (Exception $e) {
-        // Rollback transaction on error
-        $conn->rollback();
-        echo "Error submitting assessment: " . $e->getMessage();
-    }
+        // Prepare the response
+        $response = [
+            'score' => $total_score,
+            'total' => $total_points,
+            'message' => ($total_score >= ($total_points / 2)) ? 'Great job!' : 'Better luck next time!'
+        ];
 
-    $conn->close();
+        echo json_encode($response);
+    } catch (Exception $e) {
+        // Rollback the transaction on error
+        $conn->rollback();
+        echo json_encode(['error' => 'An error occurred while processing the quiz. Please try again.']);
+    }
 } else {
-    echo "No form submitted.";
+    echo json_encode(['error' => 'Invalid request method.']);
 }
 ?>

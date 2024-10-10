@@ -60,22 +60,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         switch ($question_type) {
             case 'multiple_choice':
             case 'checkbox':
-                $options = $_POST['question_opt'] ?? [];
-                $is_right = isset($_POST['is_right']) ? (array)$_POST['is_right'] : [];
-
-                foreach ($options as $index => $option) {
-                    $option_text = trim($option);
-                    if (!empty($option_text)) {
-                        $is_correct = in_array((string)$index, $is_right) ? 1 : 0;
-
-                        $options_query = "INSERT INTO rw_question_opt (option_text, is_right, rw_question_id) VALUES (?, ?, ?)";
-                        $option_stmt = $conn->prepare($options_query);
-                        $option_stmt->bind_param("sii", $option_text, $is_correct, $question_id);
-                        $option_stmt->execute();
+                    $options = $_POST['question_opt'] ?? [];
+                    $is_right = isset($_POST['is_right']) ? (array)$_POST['is_right'] : [];
+    
+                    // Delete existing options
+                    $delete_options_query = "DELETE FROM rw_question_opt WHERE rw_question_id = ?";
+                    $delete_stmt = $conn->prepare($delete_options_query);
+                    $delete_stmt->bind_param("i", $question_id);
+                    $delete_stmt->execute();
+    
+                    // Insert new options
+                    $insert_option_query = "INSERT INTO rw_question_opt (option_text, is_right, rw_question_id) VALUES (?, ?, ?)";
+                    $insert_stmt = $conn->prepare($insert_option_query);
+    
+                    foreach ($options as $index => $option_text) {
+                        $option_text = trim($option_text);
+                        if (!empty($option_text)) {
+                            $is_correct = in_array((string)$index, $is_right) ? 1 : 0;
+                            $insert_stmt->bind_param("sii", $option_text, $is_correct, $question_id);
+                            $insert_stmt->execute();
+                        }
                     }
-                }
-                break;
-
+                    break;
+    
             case 'true_false':
                 $tf_answer = $_POST['tf_answer'] ?? '';
                 $is_correct = ($tf_answer === 'true') ? 1 : 0;
