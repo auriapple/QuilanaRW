@@ -12,7 +12,6 @@
     <?php include('nav_bar.php') ?>
 
     <div class="content-wrapper">
-        <div class="scrollable-content">
             <!-- Header Container -->
             <div class="add-course-container">
                 <button class="secondary-button" id="add_reviewer_button">Add Reviewer</button>
@@ -150,7 +149,7 @@
                         </div>
                     </div>
                 </div>
-        </div>
+            </div>
     </div>
 
         <script>
