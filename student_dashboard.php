@@ -50,10 +50,8 @@ if (!isset($_SESSION['login_user_type'])) {
                         <img class="icons" src="image/DashboardClassesIcon.png" alt="Quizzes Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalQuizzes 
-                                                FROM student_submission s
-                                                JOIN assessment a ON s.assessment_id = a.assessment_id
-                                                WHERE s.student_id = '".$_SESSION['login_id']."'
-                                                AND a.assessment_type = 1
+                                                FROM rw_reviewer
+                                                WHERE reviewer_type = 1
                         ");
                         $resTotalQuizzes = $result->fetch_assoc();
                         $totalQuizzes = $resTotalQuizzes['totalQuizzes'];
@@ -63,22 +61,36 @@ if (!isset($_SESSION['login_user_type'])) {
                             <label>Total Quizzes</label> 
                         </div>
                     </div>
-                    <!-- Total Number of Exams -->
+                    <!-- Total Number of Flashcards -->
                     <div class="card" style="background-color: #DCE1FC;"> 
                         <img class="icons" src="image/DashboardExamsIcon.png" alt="Exams Icon">
                         <?php
-                        $result = $conn->query("SELECT COUNT(*) as totalExams
-                                                FROM student_submission s
-                                                JOIN assessment a ON s.assessment_id = a.assessment_id
-                                                WHERE s.student_id = '".$_SESSION['login_id']."'
-                                                AND a.assessment_type = 2
+                        $result = $conn->query("SELECT COUNT(*) as totalFlashcards
+                                                FROM rw_reviewer
+                                                WHERE reviewer_type = 2
                         ");
-                        $resTotalExams = $result->fetch_assoc();
-                        $totalExams = $resTotalExams['totalExams'];
+                        $resTotalFlashcards = $result->fetch_assoc();
+                        $totalFlashcards = $resTotalFlashcards['totalFlashcards'];
                         ?>
                         <div class="card-data">
-                            <h3> <?php echo $totalExams ?> </h3>
-                            <label>Total Exams</label> 
+                            <h3> <?php echo $totalFlashcards ?> </h3>
+                            <label>Total Flashcards</label> 
+                        </div>
+                    </div>
+                    <!-- Total Number of Shared Reviewers -->
+                    <div class="card" style="background-color: #FCDCE9;"> 
+                        <img class="icons" src="image/SharedIcon.png" alt="Exams Icon">
+                        <?php
+                        $result = $conn->query("SELECT COUNT(*) as totalFlashcards
+                                                FROM rw_reviewer
+                                                WHERE reviewer_type = 2
+                        ");
+                        $resTotalFlashcards = $result->fetch_assoc();
+                        $totalFlashcards = $resTotalFlashcards['totalFlashcards'];
+                        ?>
+                        <div class="card-data">
+                            <h3> <?php echo $totalFlashcards ?> </h3>
+                            <label>Shared</label> 
                         </div>
                     </div>
                 </div>
@@ -90,13 +102,11 @@ if (!isset($_SESSION['login_user_type'])) {
                 <div class="recent-scrollable">
                     <?php
                     $result = $conn->query("
-                        SELECT a.assessment_name, a.assessment_type, c.class_name, c.subject, ss.date_taken
-                        FROM student_results sr
-                        JOIN student_submission ss ON sr.submission_id = ss.submission_id
-                        JOIN assessment a ON sr.assessment_id = a.assessment_id
-                        JOIN administer_assessment aa ON a.assessment_id = aa.assessment_id
-                        JOIN class c ON aa.class_id = c.class_id
-                        WHERE ss.student_id = '".$_SESSION['login_id']."'
+                        SELECT r.reviewer_name, r.topic, r.reviewer_type, ss.date_taken
+                        FROM rw_student_results sr
+                        JOIN rw_student_submission ss ON sr.rw_submission_id = ss.rw_submission_id
+                        JOIN rw_reviewer r ON sr.reviewer_id = r.reviewer_id
+                        WHERE r.reviewer_type = 1 
                         ORDER BY ss.date_taken DESC
                     ");
 
@@ -104,10 +114,9 @@ if (!isset($_SESSION['login_user_type'])) {
 
                     if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
-                            $assessmentName = htmlspecialchars($row['assessment_name']);
-                            $assessmentType = htmlspecialchars($row['assessment_type']);
-                            $className = htmlspecialchars($row['class_name']);
-                            $subjectName = htmlspecialchars($row['subject']);
+                            $reviewerName = htmlspecialchars($row['reviewer_name']);
+                            $reviewerTopic = htmlspecialchars($row['topic']);
+                            $reviewerType = htmlspecialchars($row['reviewer_type']);
                             $dateTaken = date("Y-m-d", strtotime($row['date_taken']));
 
                             // Divider by date_taken
@@ -119,28 +128,27 @@ if (!isset($_SESSION['login_user_type'])) {
                                 echo "</div>";
                             }
 
-                            // Setting the background color and icon based on assessment type
-                            $bgColor = ($assessmentType == 1) ? '#FADEFF' : '#DCE1FC';
-                            $icon = ($assessmentType == 1) ? 'DashboardClassesIcon.png' : 'DashboardExamsIcon.png';
+                            $bgColor = '#FADEFF'; 
+                            $icon = 'DashboardClassesIcon.png'; 
 
-                            // Display the card with proper icon and background color
+
                             echo "<div id='recents' class='cards'>";
                                 echo "<div id='recent-card' class='card' style='background-color: {$bgColor};'>";
                                     echo "<div id='recent-data' class='card-data'>";
                                         echo "<div class='recent-icon'>";
-                                            echo "<img class='icons' src='image/{$icon}' alt='" . (($assessmentType == 1) ? 'Quiz' : 'Exam') . " Icon'>";
+                                            echo "<img class='icons' src='image/{$icon}' alt='Quiz Icon'>";
                                         echo "</div>";
                                         echo "<div class='recent-details'>";
-                                            echo "<h3>{$assessmentName}</h3>";
-                                            echo "<label>{$className} ({$subjectName})</label>";
+                                            echo "<h3>{$reviewerName}</h3>";
+                                            echo "<label>{$reviewerTopic}</label>";
                                         echo "</div>";
                                     echo "</div>";
                                 echo "</div>";
                             echo "</div>";
                         }
-                        } else {
-                            echo "<p class='no-assessments'>No recent assessments.</p>";
-                        }
+                    } else {
+                        echo "<p class='no-assessments'>No recent quiz reviewers.</p>";
+                    }
                     ?>
                 </div>
             </div>
