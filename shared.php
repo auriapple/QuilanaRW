@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php include('header.php'); ?>
-    <?php include('auth.php'); ?>
-    <?php include('db_connect.php'); ?>
+    <?php 
+    include('header.php'); 
+    include('auth.php'); 
+    include('db_connect.php'); 
+    ?>
     <title>Shared Reviewers | Quilana</title>
     <link rel="stylesheet" href="meatballMenuTest/meatball.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -33,7 +35,52 @@
             <!-- Reviewers Tab -->
             <div id="reviewers-tab" class="tab-content active">
                 <div class="reviewer-container">
-                    <p class="no-assessments">Enter a code to display a shared reviewer</p>
+                    <?php
+                    // Check if there is a saved reviewer code in the session
+                    if (isset($_SESSION['reviewer_code'])) {
+                        $reviewer_code = $_SESSION['reviewer_code'];
+                        // Display the reviewer by re-querying
+                        $query = $conn->prepare("SELECT * FROM rw_reviewer WHERE reviewer_code = ?");
+                        $query->bind_param('s', $reviewer_code);
+                        $query->execute();
+                        $result = $query->get_result();
+
+                        if ($result->num_rows > 0) {
+                            $reviewer = $result->fetch_assoc();
+                            $reviewer_id = htmlspecialchars($reviewer['reviewer_id']);
+                            $reviewer_name = htmlspecialchars($reviewer['reviewer_name']);
+                            $topic = htmlspecialchars($reviewer['topic']);
+                            $reviewer_type = htmlspecialchars($reviewer['reviewer_type']);
+
+                            echo "
+                            <div class='course-card'>
+                                <div class='course-card-body'>
+                                    <div class='meatball-menu-container'>
+                                        <button class='meatball-menu-btn'>
+                                            <i class='fas fa-ellipsis-v'></i>
+                                        </button>
+                                        <div class='meatball-menu'>
+                                            <a href='#' class='edit_reviewer' data-id='$reviewer_id'>Edit</a>
+                                            <a href='#' class='remove_reviewer' data-id='$reviewer_id'>Remove</a>
+                                            <a href='#' class='share_reviewer' data-id='$reviewer_id'>Get Code</a>
+                                        </div>
+                                    </div>
+                                    <div class='course-card-title'>$reviewer_name</div>
+                                    <div class='course-card-text'>Topic: <br>$topic</div>
+                                    <div class='course-actions'>
+                                        <button class='main-button' id='take_reviewer' data-id='$reviewer_id' data-type='$reviewer_type' type='button' onclick=\"window.location.href='take_reviewer.php?reviewer_id=$reviewer_id&reviewer_type=$reviewer_type'\">
+                                            Take Reviewer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>";
+                        } else {
+                            echo "<p class='error'>No reviewer found for the provided code.</p>";
+                        }
+                    } else {
+                        echo "<p class='no-assessments'>Enter a code to display a shared reviewer</p>";
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -85,30 +132,37 @@
             $('#missing-code-popup').fadeOut();
         });
 
-        // Handle the form submission via AJAX
-        $('#code-frm').submit(function(e) {
-            e.preventDefault();
-            var code = $('input[name="reviewer_code"]').val().trim();
+        // Handle the form submission to fetch the reviewer
+        $('#code-frm').on('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
 
-            if (code === "") {
-                // Show the missing code modal if the input is empty
-                $('#join-class-popup').fadeOut();
-                $('#missing-code-popup').fadeIn();
+            const reviewer_code = $('input[name="reviewer_code"]').val();
+            // Check if the reviewer code is empty
+            if (reviewer_code.trim() === '') {
+                $('#missing-code-popup').fadeIn(); // Show the missing code popup
             } else {
-                // Proceed with AJAX request if code is provided
                 $.ajax({
-                    url: 'fetch_reviewer.php', // Call to backend to fetch reviewer by code
                     type: 'POST',
-                    data: { reviewer_code: code },
+                    url: 'fetch_reviewer.php',
+                    data: $(this).serialize(),
                     success: function(response) {
-                        // Display the fetched reviewer in the reviewers tab
-                        $('.reviewer-container').html(response);
-                        $('#join-class-popup').fadeOut();
+                        $('.reviewer-container').html(response); // Update the reviewer container with the response
+                        localStorage.setItem('reviewer_code', reviewer_code); // Store the code in local storage
+                        $('#join-class-popup').fadeOut(); // Hide the code entry popup
                     },
                     error: function() {
-                        alert('Failed to fetch reviewer. Please check the code.');
+                        alert('Error occurred while fetching the reviewer. Please try again.');
                     }
                 });
+            }
+        });
+
+        // On page load, check local storage for reviewer code
+        $(document).ready(function() {
+            const stored_code = localStorage.getItem('reviewer_code');
+            if (stored_code) {
+                $('input[name="reviewer_code"]').val(stored_code); // Pre-fill the input field with the stored code
+                $('#code-frm').submit(); // Automatically submit the form to fetch the reviewer
             }
         });
     </script>

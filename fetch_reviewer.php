@@ -1,10 +1,12 @@
 <?php
+session_start(); // Start the session
 include('db_connect.php'); // Include your database connection
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check if the reviewer code is submitted
     if (isset($_POST['reviewer_code']) && !empty(trim($_POST['reviewer_code']))) {
         $reviewer_code = trim($_POST['reviewer_code']);
+        $_SESSION['reviewer_code'] = $reviewer_code; // Save the code in the session
 
         // Query the database for the provided reviewer code
         $query = $conn->prepare("SELECT * FROM rw_reviewer WHERE reviewer_code = ?");
@@ -36,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class='course-card-title'>$reviewer_name</div>
                     <div class='course-card-text'>Topic: <br>$topic</div>
                     <div class='course-actions'>
-                        <a class='tertiary-button' id='view_reviewer_details' href='manage_reviewer.php?reviewer_id=$reviewer_id' type='button'> Manage</a>
                         <button class='main-button' id='take_reviewer' data-id='$reviewer_id' data-type='$reviewer_type' type='button' onclick=\"window.location.href='take_reviewer.php?reviewer_id=$reviewer_id&reviewer_type=$reviewer_type'\">
                             Take Reviewer
                         </button>
