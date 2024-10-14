@@ -23,102 +23,103 @@ if (!isset($_SESSION['login_user_type'])) {
     <body>
         <?php include 'nav_bar.php'; ?>
         <div class="content-wrapper dashboard-container">
+            <!-- Summary -->
             <div class="dashboard-summary">
                 <h1> Welcome, <?php echo $firstname ?> </h1>
                 <h2> Summary </h2>
-                <div class="cards"> 
-                    <div class="card" style="background-color: #ffe2e5;">
-                        <img class="icons" src="image/DashboardCoursesIcon.png" alt="Courses Icon">
+                <div class="cards">
+                    <!-- Total Number of Classes -->
+                    <div class="card" style="background-color: #FFE2E5;">
+                        <img class="icons" src="image/DashboardCoursesIcon.png" alt="Classes Icon">
                         <?php
-                        $result = $conn->query("SELECT COUNT(*) as totalCourses FROM course 
-                                                WHERE faculty_id = '".$_SESSION['login_id']."'");
-                        $resTotalCourses = $result->fetch_assoc();
-                        $totalCourses = $resTotalCourses['totalCourses'];
-                        ?>
-                        <div class="card-data">
-                            <h3> <?php echo $totalCourses ?> </h3>
-                            <label>Total Number of Courses</label> 
-                        </div>
-                    </div>
-                    <div class="card"> 
-                        <img class="icons" src="image/DashboardClassesIcon.png" alt="Classes Icon">
-                        <?php
-                        $result = $conn->query("SELECT COUNT(*) as totalClasses FROM class
-                                                WHERE faculty_id = '".$_SESSION['login_id']."'");
+                        $result = $conn->query("SELECT COUNT(*) as totalClasses 
+                                                FROM class c
+                                                WHERE c.faculty_id = '".$_SESSION['login_id']."'");
                         $resTotalClasses = $result->fetch_assoc();
                         $totalClasses = $resTotalClasses['totalClasses'];
                         ?>
                         <div class="card-data">
                             <h3> <?php echo $totalClasses ?> </h3>
-                            <label>Total Number of Classes</label> 
+                            <label>Total Classes</label> 
+                        </div>
+                    </div>
+                    <!-- Total Number of Uploads -->
+                    <div class="card" style="background-color: #FADEFF"> 
+                        <img class="icons" src="image/DashboardClassesIcon.png" alt="Uploads Icon">
+                        <?php
+                        $result = $conn->query("SELECT COUNT(*) as totalUploads 
+                                                FROM assessment_uploads au
+                                                JOIN class c ON au.class_id = c.class_id
+                                                WHERE c.faculty_id = '".$_SESSION['login_id']."'
+                                            ");
+                        $resTotalUploads = $result->fetch_assoc();
+                        $totalUploads = $resTotalUploads['totalUploads'];
+                        ?>
+                        <div class="card-data">
+                            <h3> <?php echo $totalUploads ?> </h3>
+                            <label>Total Uploads</label> 
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="dashboard-requests">
-                <h1> Pending Requests </h1>
-                <?php
-                $qry = $conn->query("
-                    SELECT s.student_id, CONCAT(s.lastname, ', ', s.firstname) AS student_name, c.class_id, c.faculty_id, c.class_name, c.subject, se.status
-                    FROM student s
-                    JOIN student_enrollment se ON s.student_id = se.student_id
-                    JOIN class c ON se.class_id = c.class_id
-                    WHERE c.faculty_id = '".$_SESSION['login_id']."' AND se.status = '0'
-                    ORDER BY c.class_name, student_name
-                ");
-                
-                $current_class = '';
 
-                while ($row = $qry->fetch_assoc()) {
-                    $student_id = htmlspecialchars($row['student_id']);
-                    $student_name = htmlspecialchars($row['student_name']);
-                    $class_id = htmlspecialchars($row['class_id']);
-                    $class_name = htmlspecialchars($row['class_name']);
-                    $subject = htmlspecialchars($row['subject']);
-                    $status = htmlspecialchars($row['status']);
-                    
-                    if ($class_name !== $current_class) {
-                        // Close the previous class section (if it's not the first class)
-                        if ($current_class !== '') {
-                            echo "</div>"; // End of the previous class section
+            <!-- Recent Uploads -->
+            <div class="recent-assessments">
+                <h1> Recent Uploads </h1>
+                <div class="recent-scrollable">
+                    <?php
+                    $result = $conn->query("
+                        SELECT a.assessment_name, c.class_name, au.upload_date
+                        FROM assessment_uploads au
+                        JOIN assessment a ON au.assessment_id = a.assessment_id
+                        JOIN class c ON au.class_id = c.class_id
+                        WHERE c.faculty_id = '".$_SESSION['login_id']."'
+                        ORDER BY au.upload_date DESC
+                        LIMIT 10
+                    ");
+
+                    $currentDate = '';
+
+                    if ($result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            $assessmentName = htmlspecialchars($row['assessment_name']);
+                            $className = htmlspecialchars($row['class_name']);
+                            $uploadDate = date("Y-m-d", strtotime($row['upload_date']));
+
+                            // Divider by upload_date
+                            if ($uploadDate !== $currentDate) {
+                                $currentDate = $uploadDate;
+                                echo "<div class='assessment-separator'>";
+                                echo "<span class='date'> " . $currentDate . "</span>";
+                                echo "<hr class='separator-line'>";
+                                echo "</div>";
+                            }
+
+                            $bgColor = '#FADEFF'; 
+                            $icon = 'DashboardClassesIcon.png'; 
+
+                            echo "<div id='recents' class='cards'>";
+                                echo "<div id='recent-card' class='card' style='background-color: {$bgColor};'>";
+                                    echo "<div id='recent-data' class='card-data'>";
+                                        echo "<div class='recent-icon'>";
+                                            echo "<img class='icons' src='image/{$icon}' alt='Upload Icon'>";
+                                        echo "</div>";
+                                        echo "<div class='recent-details'>";
+                                            echo "<h3>{$assessmentName}</h3>";
+                                            echo "<label>{$className}</label>";
+                                        echo "</div>";
+                                    echo "</div>";
+                                echo "</div>";
+                            echo "</div>";
                         }
-                        
-                        // Start a new class section
-                        $current_class = $class_name;
-                        ?>
-                        <div class="class-header">
-                            <span><?php echo $class_name . ' ( ' . $subject . ' )' ?></span>
-                            <div class="line"></div>
-                        </div>
-                        <div class="student-list">
-                        <?php
-                     }
-
-                     // Student Items 
-                     ?>
-                     <div class="student-item">
-                        <label> <?php echo $student_name ?> </label>
-                        <div class="btns">
-                            <button class="btn btn-primary btn-sm accept-btn accept" 
-                                data-class-id="<?php echo $class_id ?>" 
-                                data-student-id="<?php echo $student_id ?>" 
-                                data-status="1" 
-                                type="button">Accept</button>
-                            <button class="btn btn-primary btn-sm reject-btn reject" 
-                                data-class-id="<?php echo $class_id ?>" 
-                                data-student-id="<?php echo $student_id ?>" 
-                                data-status="2" 
-                                type="button">Reject</button>
-                        </div>
-                     </div>
-                     <?php
-                }
-
-                if ($current_class !== '') {
-                    echo "</div>"; // Close the last student-list div
-                }
-                ?>
+                    } else {
+                        echo "<p class='no-uploads'>No recent uploads.</p>";
+                    }
+                    ?>
+                </div>
             </div>
+
+            <!-- Calendar -->
             <div class="dashboard-calendar">
                 <div class="wrapper">
                     <header>
@@ -143,30 +144,5 @@ if (!isset($_SESSION['login_user_type'])) {
                 </div>
             </div>
         </div>
-        <script>
-            $(document).on('click', '.accept-btn, .reject-btn', function() {
-                var classId = $(this).data('class-id');
-                var studentId = $(this).data('student-id');
-                var status = $(this).data('status');
-
-                $.ajax({
-                    url: 'status_update.php',
-                    type: 'POST',
-                    data: {
-                        class_id: classId,
-                        student_id: studentId,
-                        status: status
-                    },
-                    success: function(response) {
-                        if (response == 'success') {
-                            alert('Student status updated.');
-                            location.reload();
-                        } else {
-                            alert('Failed to update status.');
-                        }
-                    } 
-                });
-            });
-        </script>
     </body>
 </html>

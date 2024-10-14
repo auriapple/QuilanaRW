@@ -23,6 +23,18 @@ if (isset($_GET['class_id'])) {
         GROUP BY a.assessment_id, a.assessment_name, aa.date_administered
     ");
 
+    $qry_assessments = $conn->query("
+    SELECT a.assessment_id, a.assessment_name, aa.date_administered, 
+           SUM(q.total_points) AS total_points, 
+           CASE WHEN au.upload_id IS NOT NULL THEN 1 ELSE 0 END AS is_uploaded
+    FROM administer_assessment aa
+    JOIN assessment a ON aa.assessment_id = a.assessment_id
+    JOIN questions q ON q.assessment_id = a.assessment_id
+    LEFT JOIN assessment_uploads au ON a.assessment_id = au.assessment_id AND aa.class_id = au.class_id
+    WHERE aa.class_id = '$class_id'
+    GROUP BY a.assessment_id, a.assessment_name, aa.date_administered
+    ");
+
     if (!$qry_assessments) {
         die("Error: " . $conn->error);
     }
@@ -83,13 +95,16 @@ if (isset($_GET['class_id'])) {
                         <td>' . htmlspecialchars($assessment['assessment_name']) . '</td>
                         <td>' . htmlspecialchars($assessment['date_administered']) . '</td>
                         <td>' . htmlspecialchars($assessment['total_points']) . '</td>
-                      <td>
-                        <div class="btn-container">
-                        <a href="view_assessment.php?id=' . htmlspecialchars($assessment['assessment_id']) . '&class_id=' . htmlspecialchars($class_id) . '" class="btn btn-primary btn-sm">View</a>
-                        <button class="btn btn-danger btn-sm" onclick="removeAdministeredAssessment(' . htmlspecialchars($assessment['assessment_id']) . ', ' . htmlspecialchars($class_id) . ')">Remove</button>
-                        </div>
-                    </td>
-                    </tr>';
+                        <td>
+                            <div class="btn-container">
+                                <a href="view_assessment.php?id=' . htmlspecialchars($assessment['assessment_id']) . '&class_id=' . htmlspecialchars($class_id) . '" class="btn btn-primary btn-sm">View</a>
+                                <button class="btn ' . ($assessment['is_uploaded'] ? 'btn-danger' : 'btn-success') . ' btn-sm upload-btn" 
+                                        onclick="toggleUpload(' . htmlspecialchars($assessment['assessment_id']) . ', ' . htmlspecialchars($class_id) . ', ' . $assessment['is_uploaded'] . ')">
+                                    ' . ($assessment['is_uploaded'] ? 'Remove Upload' : 'Upload') . '
+                                </button>
+                            </div>
+                        </td>
+                      </tr>';
             }
         } else {
             echo '<tr>
@@ -198,27 +213,33 @@ function openTab(evt, tabName) {
         }
     });
 });
-    function removeAdministeredAssessment(assessmentId, classId) {
-    if (confirm("Are you sure you want to remove this administered assessment from this class?")) {
-        fetch('remove_administered_assessment.php', {
+
+function toggleUpload(assessmentId, classId, isUploaded) {
+    const action = isUploaded ? 'remove' : 'upload';
+    const confirmMessage = isUploaded 
+        ? "Are you sure you want to remove this assessment upload?" 
+        : "Are you sure you want to upload this assessment?";
+
+    if (confirm(confirmMessage)) {
+        fetch('assessment_upload.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: 'assessment_id=' + assessmentId + '&class_id=' + classId
+            body: `assessment_id=${assessmentId}&class_id=${classId}&action=${action}`
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("Administered assessment removed successfully from this class");
+                alert(data.message);
                 location.reload(); // Reload the page to reflect the changes
             } else {
-                alert("Failed to remove administered assessment: " + data.message);
+                alert("Failed to " + action + " assessment: " + data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert("An error occurred while removing the administered assessment");
+            alert("An error occurred while " + action + "ing the assessment");
         });
     }
 }

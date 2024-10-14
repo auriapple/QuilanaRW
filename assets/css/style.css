@@ -631,6 +631,16 @@ button.btn-rounded{
     outline: none;
     text-align: center;
 }
+[id^=viewAssessment_] {
+    width: calc(100% - 40px);
+    border-radius: 5px;
+    padding: 12px 30px;
+    font-size: 14px;
+    position: absolute;
+    bottom: 25px;
+    outline: none;
+    text-align: center;
+}
 #administer,
 #manage,
 #viewClasses,
