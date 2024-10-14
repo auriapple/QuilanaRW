@@ -15,15 +15,6 @@ if (isset($_GET['class_id'])) {
 
     // Fetch the assessments with related details
     $qry_assessments = $conn->query("
-        SELECT a.assessment_id, a.assessment_name, aa.date_administered, SUM(q.total_points) AS total_points
-        FROM administer_assessment aa
-        JOIN assessment a ON aa.assessment_id = a.assessment_id
-        JOIN questions q ON q.assessment_id = a.assessment_id
-        WHERE aa.class_id = '$class_id'
-        GROUP BY a.assessment_id, a.assessment_name, aa.date_administered
-    ");
-
-    $qry_assessments = $conn->query("
     SELECT a.assessment_id, a.assessment_name, aa.date_administered, 
            SUM(q.total_points) AS total_points, 
            CASE WHEN au.upload_id IS NOT NULL THEN 1 ELSE 0 END AS is_uploaded
