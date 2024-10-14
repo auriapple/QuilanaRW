@@ -50,8 +50,9 @@ if (!isset($_SESSION['login_user_type'])) {
                         <img class="icons" src="image/DashboardClassesIcon.png" alt="Quizzes Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalQuizzes 
-                                                FROM rw_reviewer
-                                                WHERE reviewer_type = 1
+                                                FROM rw_reviewer rw
+                                                WHERE rw.student_id = '".$_SESSION['login_id']."'
+                                                AND reviewer_type = 1
                         ");
                         $resTotalQuizzes = $result->fetch_assoc();
                         $totalQuizzes = $resTotalQuizzes['totalQuizzes'];
@@ -66,8 +67,9 @@ if (!isset($_SESSION['login_user_type'])) {
                         <img class="icons" src="image/DashboardExamsIcon.png" alt="Exams Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalFlashcards
-                                                FROM rw_reviewer
-                                                WHERE reviewer_type = 2
+                                                FROM rw_reviewer rw
+                                                WHERE rw.student_id = '".$_SESSION['login_id']."'
+                                                AND reviewer_type = 2
                         ");
                         $resTotalFlashcards = $result->fetch_assoc();
                         $totalFlashcards = $resTotalFlashcards['totalFlashcards'];
@@ -82,8 +84,9 @@ if (!isset($_SESSION['login_user_type'])) {
                         <img class="icons" src="image/SharedIcon.png" alt="Exams Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalFlashcards
-                                                FROM rw_reviewer
-                                                WHERE reviewer_type = 2
+                                                FROM rw_reviewer rw
+                                                WHERE rw.student_id = '".$_SESSION['login_id']."'
+                                                AND reviewer_type = 2
                         ");
                         $resTotalFlashcards = $result->fetch_assoc();
                         $totalFlashcards = $resTotalFlashcards['totalFlashcards'];
