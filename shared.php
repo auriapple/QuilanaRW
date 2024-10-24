@@ -153,7 +153,7 @@
 
                         if (response.status === 'success') {
                             $('.course-container').append(`
-                                <div class="course-card">
+                                <div class="course-card" data-id="${response.reviewer_id}">
                                     <div class="course-card-body">
                                         <div class="meatball-menu-container">
                                             <button class="meatball-menu-btn">
@@ -162,7 +162,6 @@
                                             <div class="meatball-menu">
                                                 <a href="#" class="edit_reviewer" data-id="${response.reviewer_id}">Edit</a>
                                                 <a href="#" class="remove_reviewer" data-id="${response.reviewer_id}">Remove</a>
-                                               
                                             </div>
                                         </div>
                                         <div class="course-card-title">${response.reviewer_name}</div>
