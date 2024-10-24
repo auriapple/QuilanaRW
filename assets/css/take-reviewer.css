@@ -1,0 +1,78 @@
+.back-arrow {
+    font-size: 24px; 
+    margin: 10px 0 15px 20px;
+}
+.back-arrow a {
+    color: #4A4CA6; 
+    text-decoration: none;
+}
+.back-arrow a:hover {
+    color: #0056b3; 
+}
+.reviewer-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    margin-right: 26px;
+    min-height: 80vh;
+}
+.header{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+    margin-top: -50px;
+    margin-right: 10px;
+    z-index: 1000;
+}
+
+.flashcard {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid gray;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 50vh;
+}
+.flashcard .front, .flashcard .back {
+    display: flex;           
+    justify-content: center;  
+    align-items: center;      
+    height: 40%;            
+    padding: 20px;
+    text-align: center;
+}
+
+.front p, .back p {
+    font-size: 30px;         
+}
+.flashcard .back.hidden {
+    display: none;
+}
+.btn-primary {
+    background-color: #4A4CA6;
+    border-color: #4A4CA6;
+}
+.btn-primary:hover {
+    background-color: #3a3b8c;
+    border-color: #3a3b8c;
+}
+.buttons {
+    display: flex;
+    justify-content: center; 
+    gap: 10px; 
+    margin-top: 20px; 
+}
+.flashcard-counter {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+.secondary-button {
+    margin-top: -15px; 
+    margin-bottom: 15px;
+}

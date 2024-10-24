@@ -44,84 +44,7 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
     <title>Take Reviewer | Quilana</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        
-        .back-arrow {
-            font-size: 24px; 
-            margin: 10px 0 15px 20px;
-        }
-        .back-arrow a {
-            color: #4A4CA6; 
-            text-decoration: none;
-        }
-        .back-arrow a:hover {
-            color: #0056b3; 
-        }
-        .reviewer-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            margin-right: 26px;
-            min-height: 80vh;
-        }
-        .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            position: relative;
-            margin-top: -50px;
-            margin-right: 10px;
-            z-index: 1000;
-        }
-
-        .flashcard {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid gray;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            min-height: 50vh;
-        }
-        .flashcard .front, .flashcard .back {
-            display: flex;           
-            justify-content: center;  
-            align-items: center;      
-            height: 40%;            
-            padding: 20px;
-            text-align: center;
-        }
-
-        .front p, .back p {
-            font-size: 30px;         
-        }
-        .flashcard .back.hidden {
-            display: none;
-        }
-        .btn-primary {
-            background-color: #4A4CA6;
-            border-color: #4A4CA6;
-        }
-        .btn-primary:hover {
-            background-color: #3a3b8c;
-            border-color: #3a3b8c;
-        }
-        .buttons {
-            display: flex;
-            justify-content: center; 
-            gap: 10px; 
-            margin-top: 20px; 
-        }
-        .flashcard-counter {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        
-    </style>
+    <link rel="stylesheet" href="assets/css/take-reviewer.css">
 </head>
 <body>
     <?php include('nav_bar.php'); ?>
@@ -165,7 +88,7 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
 
         <?php if ($reviewer_type == 1): // Quiz ?>
             <form id="quiz-form" action="submit_quiz.php" method="POST">
-                <div class="header-container">
+                <div class="header">
                     <button type="button" onclick="showPopup('confirmation-popup')" id="submit" class="secondary-button">Submit</button>
                 </div>
                 <div class="questions-container">

@@ -9,8 +9,8 @@ $assessment_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if ($assessment_id > 0) {
     // Fetch the assessment details and time limits based on mode
     $assessment_query = "
-        SELECT a.assessment_name, a.topic, a.time_limit AS assessment_time_limit, a.assessment_mode, 
-               q.question, q.ques_type, qo.option_txt, qo.is_right, qi.identification_answer, q.time_limit AS question_time_limit
+        SELECT a.assessment_name, a.topic, a.assessment_mode, 
+               q.question, q.ques_type, qo.option_txt, qo.is_right, qi.identification_answer
         FROM assessment a
         LEFT JOIN questions q ON a.assessment_id = q.assessment_id
         LEFT JOIN question_options qo ON q.question_id = qo.question_id
@@ -43,23 +43,6 @@ if ($assessment_id > 0) {
     exit;
 }
 
-// Calculate the overall time limit
-$assessment_mode = $assessment_details[0]['assessment_mode'];
-$overall_time_limit_minutes = 0;
-
-if ($assessment_mode == 1) { // Normal Mode
-    $overall_time_limit_minutes = intval($assessment_details[0]['assessment_time_limit']);
-} elseif ($assessment_mode == 2 || $assessment_mode == 3) { // Quiz Bee or Speed Mode
-    $total_question_time_limit = 0;
-    $counted_questions = array();
-    foreach ($assessment_details as $detail) {
-        if (isset($detail['question_time_limit']) && !in_array($detail['question'], $counted_questions)) {
-            $total_question_time_limit += intval($detail['question_time_limit']);
-            $counted_questions[] = $detail['question'];
-        }
-    }
-    $overall_time_limit_minutes = ceil($total_question_time_limit / 60);
-}
 
 ?>
 
@@ -103,14 +86,15 @@ if ($assessment_mode == 1) { // Normal Mode
             font-size: 16px;
             color: #555;
         }
-        .questions-container {
+        .question-container {
             background-color: #fff;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-height: 410px;
+            max-height: 75%;
             overflow-y: auto;
-            width: 100%;
+            max-width: 100%;
+            margin-left: 10px;
         }
         .question {
             margin-bottom: 25px;
@@ -152,7 +136,7 @@ if ($assessment_mode == 1) { // Normal Mode
 
     <div class="content-wrapper">
         <div class="back-arrow">
-            <a href="class_enrolled.php?class_id=<?php echo htmlspecialchars($_GET['class_id']); ?>&show_modal=true">
+            <a href="class_enrolled.php">
                 <i class="fa fa-arrow-left"></i>
             </a>
         </div>
@@ -160,27 +144,10 @@ if ($assessment_mode == 1) { // Normal Mode
         <div class="assessment-details">
             <h2><?php echo htmlspecialchars($assessment_details[0]['assessment_name']); ?></h2>
             <p><strong>Topic:</strong> <?php echo htmlspecialchars($assessment_details[0]['topic']); ?></p>
-
-            <?php
-            switch ($assessment_mode) {
-                case 1:
-                    echo '<p><strong>Overall Time Limit:</strong> ' . htmlspecialchars($overall_time_limit_minutes) . ' minutes (Normal Mode)</p>';
-                    break;
-                case 2:
-                    echo '<p><strong>Overall Time Limit:</strong> ' . htmlspecialchars($overall_time_limit_minutes) . ' minutes (Quiz Bee Mode)</p>';
-                    break;
-                case 3:
-                    echo '<p><strong>Overall Time Limit:</strong> ' . htmlspecialchars($overall_time_limit_minutes) . ' minutes (Speed Mode)</p>';
-                    break;
-                default:
-                    echo '<p><strong>Overall Time Limit:</strong> Not specified</p>';
-                    break;
-            }
-            ?>
         </div>
 
         <div style="padding-right: 50px;">
-            <div class="questions-container">
+            <div class="question-container">
                 <?php
                 $current_question = null;
                 $question_number = 1;
@@ -193,11 +160,6 @@ if ($assessment_mode == 1) { // Normal Mode
                         echo '<div class="question">';
                         echo '<div class="question-number">Question ' . $question_number . ':</div>';
                         echo '<p>' . htmlspecialchars($current_question) . '</p>';
-                        
-                        if ($assessment_mode == 2 || $assessment_mode == 3) {
-                            $question_time_limit = isset($detail['question_time_limit']) ? htmlspecialchars($detail['question_time_limit']) : 'Not specified';
-                            echo '<div class="time-limit">Time Limit: ' . $question_time_limit . ' seconds</div>';
-                        }
                         
                         $question_number++;
                     }

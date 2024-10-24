@@ -42,10 +42,10 @@
                 <i class="fa fa-book sidebar-icon"></i> Classes
             </a>
             <a href="reviewer.php" class="sidebar-item">
-                <i class="fa-solid fa-folder sidebar-icon"></i> Reviewer
+                <i class="fas fa-folder sidebar-icon"></i> Reviewer
             </a>
 			<a href="shared.php" class="sidebar-item">
-                <i class="fa-solid fa-share-from-square sidebar-icon"></i> Shared
+                <i class="fas fa-share-alt sidebar-icon"></i> Shared
             </a>
         <?php endif; ?>
     </div>

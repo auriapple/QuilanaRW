@@ -81,19 +81,17 @@ if (!isset($_SESSION['login_user_type'])) {
                     </div>
                     <!-- Total Number of Shared Reviewers -->
                     <div class="card" style="background-color: #FCDCE9;"> 
-                        <img class="icons" src="image/SharedIcon.png" alt="Exams Icon">
+                        <img class="icons" src="image/SharedIcon.png" alt="Share Icon">
                         <?php
-                        $result = $conn->query("SELECT COUNT(*) as totalFlashcards
-                                                FROM rw_reviewer rw
-                                                WHERE rw.student_id = '".$_SESSION['login_id']."'
-                                                AND reviewer_type = 2
-                        ");
-                        $resTotalFlashcards = $result->fetch_assoc();
-                        $totalFlashcards = $resTotalFlashcards['totalFlashcards'];
+                        $result = $conn->query("SELECT COUNT(*) as totalShared 
+                                            FROM user_reviewers ur 
+                                            WHERE ur.student_id = '".$_SESSION['login_id']."'");
+                        $resTotalShared = $result->fetch_assoc();
+                        $totalShared = $resTotalShared['totalShared'];
                         ?>
                         <div class="card-data">
-                            <h3> <?php echo $totalFlashcards ?> </h3>
-                            <label>Shared</label> 
+                            <h3> <?php echo $totalShared ?> </h3>
+                            <label>Total Shared Reviewers</label> 
                         </div>
                     </div>
                 </div>
