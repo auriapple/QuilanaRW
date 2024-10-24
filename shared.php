@@ -153,15 +153,14 @@
 
                         if (response.status === 'success') {
                             $('.course-container').append(`
-                                <div class="course-card" data-id="${response.reviewer_id}">
+                                <div class="course-card" data-id="${response.shared_id}"> <!-- Use shared_id here -->
                                     <div class="course-card-body">
                                         <div class="meatball-menu-container">
                                             <button class="meatball-menu-btn">
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </button>
                                             <div class="meatball-menu">
-                                                <a href="#" class="edit_reviewer" data-id="${response.reviewer_id}">Edit</a>
-                                                <a href="#" class="remove_reviewer" data-id="${response.reviewer_id}">Remove</a>
+                                                <a href="#" class="remove_reviewer" data-id="${response.shared_id}">Remove</a>
                                             </div>
                                         </div>
                                         <div class="course-card-title">${response.reviewer_name}</div>
@@ -179,6 +178,7 @@
                                     </div>
                                 </div>
                             `);
+
                             Swal.fire({
                                 title: 'Success!',
                                 text: response.message,
@@ -223,6 +223,58 @@
                         }
                     });
                 }
+
+                                // Handle removal of shared reviewer
+                $(document).on('click', '.remove_reviewer', function(event) {
+                    event.preventDefault();
+                    var sharedId = $(this).data('id'); // Get the shared ID
+
+                    // Confirmation before removal
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                type: 'POST',
+                                url: 'delete_shared_reviewer.php', // Change to your processing PHP script
+                                data: { shared_id: sharedId },
+                                dataType: 'json',
+                                success: function(response) {
+                                    if (response.status === 'success') {
+                                        // Remove the reviewer card from the UI
+                                        $(`.course-card[data-id="${sharedId}"]`).remove();
+                                        Swal.fire({
+                                            title: 'Deleted!',
+                                            text: response.message,
+                                            icon: 'success',
+                                            confirmButtonText: 'OK'
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: 'Error!',
+                                            text: response.message,
+                                            icon: 'error',
+                                            confirmButtonText: 'OK'
+                                        });
+                                    }
+                                },
+                                error: function() {
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: 'An error occurred while trying to delete the reviewer.',
+                                        icon: 'error',
+                                        confirmButtonText: 'OK'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+
             });
         </script>
     </div>
