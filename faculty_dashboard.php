@@ -21,7 +21,7 @@ if (!isset($_SESSION['login_user_type'])) {
         <script src="assets/js/calendar.js" defer></script>
     </head>
     <body>
-        <?php include 'nav_bar.php'; ?>
+        <?php include('nav_bar.php') ?>
         <div class="content-wrapper dashboard-container">
             <!-- Summary -->
             <div class="dashboard-summary">

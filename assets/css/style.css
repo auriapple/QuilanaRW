@@ -72,6 +72,13 @@ body {
     transform: scale(1.02);
     transition: transform 0.1s ease;
 }
+.course-actions .main-button,
+.course-actions .tertiary-button,
+.assessment-actions .main-button,
+.assessment-actions .tertiary-button {
+    width: 100%;
+    flex-grow: 1;
+}
 /* END */
 
 /* HEADER STYLE */
@@ -122,6 +129,9 @@ body {
 /* END */
 
 /* TABS STYLE */
+.content-wrapper {
+    height: 100vh;
+}
 .tabs-container {
     margin-bottom: 20px;
 }
@@ -149,10 +159,14 @@ body {
 .tab-content.active {
     display: block;
 }
+.tab-link:hover:not(.active)  {
+    background: linear-gradient(0deg, rgba(238,238,238,1) 0%, rgba(238,238,238,0) 100%);
+    border-bottom: 2px solid gray;
+    color: #9ba4dd;
+}
 /* END */
 
 /* POPUP STYLES */
-/* Popup Styles */
 .popup-overlay {
     position: fixed;
     top: 0;
@@ -167,25 +181,23 @@ body {
 }
 .popup-content {
     background: #FFFFFF;
-    padding-left: 45px;
-    padding-right:45px;
-    padding-top: 60px;
     border-radius: 25px;
-    width: 500px;
-    height: 300px;
     text-align: center;
+    justify-content: center;
     position: relative;
-    z-index: 1001 !important;
+    display: flex;
+    flex-direction: column;
+    z-index: 1001;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
 }
 .popup-title {
     font-weight: bold;
     color: #1E1A43;
+    text-align: center;
 }
 .popup-message {
-    margin: 10px 0;
-    font-size: 14px;
     color: #4a4a4a;
+    text-align: center;
 }
 .popup-close {
     position: absolute;
@@ -200,6 +212,17 @@ body {
 .popup-close:focus{
     outline: none;
 }
+.popup-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 0 15px;
+}
+.popup-buttons button {
+    flex: 1;
+    max-width: 200px;
+}
 /* END */
 
 /* LANDING PAGE */
@@ -211,13 +234,18 @@ body {
     padding: 0;
     height: 100vh;
     width: 100vw;
-    background-image: url('http://localhost/QUILANA/image/HomePage.png');
-    background-size: 1200px 800px;
-    background-size: contain;
-    background-position: right center;
-    background-repeat: no-repeat;
     position: relative;
-    z-index: 1;
+    z-index: 0;
+}
+.landing-image {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 0;
 }
 .landing-page h1 {
     position: absolute;
@@ -229,7 +257,7 @@ body {
     background-clip: text;
     top: 20px;
     left: 20px;
-    z-index: 2;
+    z-index: 1;
 }
 
 /* About/Contact/Privacy Links Style */
@@ -261,6 +289,8 @@ body {
     border-radius: 15px;
     padding: 10px 30px;
     font-size: 20px;
+    z-index: 1;
+    position: relative;
 }
 /* END */
 
@@ -294,12 +324,16 @@ body {
 /* Illustration in Left Section */
 .illustration {
     width: 100%;
-    height: 100%;
+    height: 400px;
     max-width: 600px;
-    background-image: url('http://localhost/QUILANA/image/User.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.illustration img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 /* Right Section */
@@ -317,15 +351,19 @@ body {
 
 /* Return Button */
 .return{
-    background-image: url('http://localhost/QUILANA/image/Return.png');
-    background-repeat: no-repeat;
-    background-size: contain;
     width:40px;
     height:40px;
     position:absolute;
     top:20px;
     left:20px;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.return img {
+    max-width: 100%;
+    max-height: 100%;
 }
 
 /* Sign In and Sign Up Form Styles */
@@ -345,6 +383,8 @@ body {
     display: block;
     font-size: medium;
     font-weight: lighter;
+    text-align: left;
+    margin-bottom: 2px;
 }
 .form-group.row {
     display: flex;
@@ -400,6 +440,18 @@ body {
     box-shadow: 0 0 8px rgba(74, 76, 166, 0.5);
     outline: none;
 }
+/* Invalid State */
+.form input[type="text"].invalid,
+.form input[type="email"].invalid,
+.form input[type="password"].invalid {
+    border-color: red;
+}
+/* Note Styles */
+.validation-note {
+    color: red;
+    font-size: 12px;
+    margin-top: 4px;
+}
 
 /* Buttons */
 #signInButton, #signUpButton {
@@ -408,69 +460,6 @@ body {
     border-radius: 15px;
     padding: 10px 30px;
     font-size: 20px;
-}
-/* END */
-
-/* NAVIGATION BAR STYLES */
-div#sidebar {
-    width: 250px;
-    height: 100vh;
-    position: absolute;
-    background-image: linear-gradient(#1E1A43, #4A4CA6);
-}
-#sidebar .sidebar-item {
-    position: relative;
-    height: 50px;
-    padding: 10px;
-    display: inline-flex;
-    font-size: 15px;
-    align-items: center;
-    /* border-bottom: 1px solid #007bff6b; */
-    width: 100%;
-    color: white !important;
-    font-weight: 700
-}
-.page-item.active .page-link{
-    background-color: #1E1A43;
-    border-color: #1E1A43;
-}
-#sidebar .sidebar-item:hover{
-    text-decoration: unset;
-    background: #fffdfd;
-    color: #353535 !important;
-}
-#sidebar .sidebar-item.active {
-    text-decoration: unset;
-    background: #fffdfd !important;
-    color: rgb(0, 0, 0) !important;
-}
-#sidebar .sidebar-item.active .sidebar-icon {
-    color: #000 !important;
-}
-#sidebar .sidebar-item:hover .sidebar-icon {
-    color: #000 !important;
-}
-#sidebar .sidebar-item .sidebar-icon {
-	width:11%;
-	padding: auto;
-    color: white;
-}
-div#main{
-	margin-top: 10px;
-	margin-left:250px;
-	padding: 20px
-}
-.admin{
-    margin-top: 10px;
-    margin-left:250px;
-    padding: 20px;
-    width:82% !important;
-}
-.pull-right{
-	float: right;
-}
-button.btn-rounded{
-	border-radius: 50% !important;
 }
 /* END */
 
@@ -501,6 +490,110 @@ button.btn-rounded{
     height: 40px;
     outline: none;
 }
+
+/* NAVIGATION STYLES */
+.navbar {
+    background-image: linear-gradient(to right, #1E1A43, #4A4CA6);
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+.navbar-content {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+}
+.navbar-left,
+.navbar-title,
+.navbar-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+.navbar-right {
+    justify-content: right;
+}
+.navbar-title {
+    justify-content: center;
+}
+.navbar h3 {
+    margin: 0;
+}
+
+#sidebar {
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    left: -250px;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+    z-index: 999;
+    background-image: linear-gradient(#1E1A43, #4A4CA6);
+}
+#sidebar.active {
+    left: 0;
+}
+.sidebar-item {
+    position: relative;
+    padding: 10px 15px 10px 30px;
+    font-size: 15px;
+    height: 50px;
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    width: 91%;
+    color: white;
+    font-weight: 700;
+    margin: 5px 10px;
+    border-radius: 10px;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+.sidebar-item:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-decoration: unset;
+}
+.sidebar-item.active {
+    text-decoration: unset;
+    background-image: linear-gradient(#8794F2, #6A7AC7);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.sidebar-item.active:hover {
+    text-decoration: unset;
+    background-image: linear-gradient(#8794F2, #6A7AC7);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.sidebar-icon {
+    margin-right: 10px;
+    padding: auto;
+    width: 10%;
+}
+
+.content-wrapper {
+    transition: margin-left 0.3s;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-top: 60px;
+}
+.content-wrapper.active {
+    margin-left: 270px;
+}
+
+#sidebarCollapse {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    outline: none;
+}
+/* END */
 
 /* CLASSES AND RESULTS - STUDENT */
 /* JOIN CLASS POPUP */
@@ -581,6 +674,7 @@ button.btn-rounded{
     color: #1E1A43;
     font-size: 20px;
     font-weight: bold;
+    margin-right: 15px;
 }
 .class-card-text,
 .course-card-text,
@@ -600,18 +694,18 @@ button.btn-rounded{
 .course-actions,
 .assessment-actions {
     display: flex;
-    justify-content: space-between; 
+    justify-content: space-between;
+    gap: 20px;
     position: absolute;
-    bottom: 20px; 
-    left: 20px; 
-    right: 20px;
-    align-items: center; 
+    bottom: 20px;
+    width: calc(100% - 40px);
 }
 
 /* Buttons */
+/* Buttons */
 [id^=viewResult_],
 [id^=viewClassDetails_],
-#view_class_details,
+[id^=takeAssessment_],
 #viewClassDetails {
     width: calc(100% - 40px);
     border-radius: 5px;
@@ -619,28 +713,25 @@ button.btn-rounded{
     font-size: 14px;
     position: absolute;
     bottom: 20px;
-    outline: none !important; 
+    outline: none !important;
 }
-[id^=takeAssessment_] {
-    width: calc(100% - 40px);
-    border-radius: 5px;
-    padding: 12px 30px;
+
+td #viewClassDetails {
+    width: 100px;
+    height: 32px;
+    margin: 0;
+    bottom: 0px;
+    position: relative;
     font-size: 14px;
-    position: absolute;
-    bottom: 25px;
-    outline: none;
+    font-weight: normal;
+    padding: 5px;
     text-align: center;
 }
-[id^=viewAssessment_] {
-    width: calc(100% - 40px);
-    border-radius: 5px;
-    padding: 12px 30px;
-    font-size: 14px;
-    position: absolute;
-    bottom: 25px;
-    outline: none;
-    text-align: center;
+
+#studentScoresTitle {
+    font-weight: bold;
 }
+
 #administer,
 #manage,
 #viewClasses,
@@ -653,6 +744,19 @@ button.btn-rounded{
     padding: 12px 15px;
     width: 135px;
 }
+.btn-container .btn {
+    min-width: 100px;
+    padding: 5px 10px;
+    font-size: 15px;
+    text-align: center;
+    vertical-align: middle; 
+    display: inline-flex;
+    justify-content: center; 
+    align-items: center;
+}
+
+
+
 /* END */
 
 /* POPUPS */
@@ -855,7 +959,6 @@ thead th {
 /* END */
 
 /* Media Queries for Responsiveness */
-
 /* For tablets and smaller devices (width 768px and below) */
 @media (max-width: 768px) {
     /* Left Section Adjustments */
@@ -863,13 +966,11 @@ thead th {
         font-size: 50px;
         margin-left: 80px;
     }
-
     .logo {
         font-size: 50px;
         top: 10%;
         left: 18%;
     }
-
     .illustration {
         max-width: 400px;
         max-height: 500px;
@@ -880,12 +981,10 @@ thead th {
     #right-section {
         margin-left: -2rem;
     }
-
     .sign-in-form h2 {
         font-size: 1.5rem;
         margin-left: 6rem;
     }
-
     .custom-button {
         font-size: 16px;
         padding: 8px 20px;
@@ -897,9 +996,19 @@ thead th {
         margin-top: 300px;
     }
 
-    /* Course Container Adjustments */
-    .course-card {
-        width: 45%;
+    .scrollable-content::-webkit-scrollbar {
+        display: none;
+    }
+
+    #sidebar {
+        width: 100%;
+        left: -100%;
+    }
+    #sidebar.active {
+        width: 50%;
+    }
+    .content-wrapper.active {
+        margin-left: 0;
     }
 }
 
@@ -915,18 +1024,15 @@ thead th {
         height: 50vh;
         padding: 1rem;
     }
-
     #left-section h1 {
         font-size: 40px;
         margin-left: 40px;
     }
-
     .logo {
         font-size: 40px;
         top: 5%;
         left: 15%;
     }
-
     .illustration {
         max-width: 300px;
         max-height: 400px;
@@ -938,37 +1044,99 @@ thead th {
         margin-left: 0;
         border-radius: 0;
     }
-
     .sign-in-form {
         margin: 2rem 1rem;
     }
-
     .sign-in-form h2 {
         font-size: 1.2rem;
         margin-left: 4rem;
     }
 
-    .custom-button {
-        font-size: 14px;
-        padding: 6px 16px;
-        margin-right: 50px;
-        margin-bottom: 30px;
-    }
-
     #getStartedButton {
         margin-top: 200px;
     }
+    
+    /* Topbar Adjustments */
+    .navbar .navbar-content {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        gap: 20px;
+    }
+    .navbar-content .navbar-left,
+    .navbar-content .navbar-title {
+        align-items: center;
+        justify-content: left;
+        max-width: fit-content;
+    }
+    .navbar-title strong{
+        font-size: 25px;
+    }
 
-    /* Course Container Adjustments */
-    .course-card {
+    .navbar-content .navbar-right {
+        flex-grow: 1;
         width: 100%;
     }
-
-    @media (max-width: 768px) {
-        .course-card,
-        .class-card,
-        .assessment-card {
-            width: 100%; /* Adjust for smaller screens */
-        }
+    .navbar-right a {
+        text-align: right;
+        width: 100%;
+        white-space: nowrap;
     }
+}
+
+/* Search Bar Resposiveness */
+@media (max-width: 550px) {
+    .search-bar {
+        position: relative;
+        width: 41px;
+        border-radius: 20px;
+    }
+    #search-input {
+        display: hide;
+    }
+    .search-bar button {
+        position: absolute;
+        right: 21px;
+    }
+    .search-bar:focus-within {
+        width: 100%;
+        border-radius: 10px;
+    }
+    .search-bar:focus-within button  {
+        position: relative;
+        right: 0px;
+    }
+    .search-bar input::placeholder {
+        color: transparent;
+    }
+
+    #joinClass, 
+    #addCourse,
+    #addAssessment,
+    #addClass {
+        padding: 2px;
+    }
+}
+/* Scroll Bar Design */
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 20px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 20px;
+    background-clip: padding-box;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
 }
