@@ -76,3 +76,47 @@
     margin-top: -15px; 
     margin-bottom: 15px;
 }
+/*** BASE POPUP STYLES ***/
+.popup-content {
+    display: flex;
+    flex-direction: column;
+    height: 350px;
+    width: 500px;
+    padding: 20px;
+    justify-content: center;
+    align-items: center;
+}
+#confirm,
+#cancel,
+#result,
+#result-2,
+#submit-answers,
+#error {
+    font-size: 14px;
+    outline: none;
+}
+@media screen and (max-width: 500px) {
+  
+    #confirmation-popup .popup-content,
+    #success-popup .popup-content,
+    #timer-runout-popup .popup-content,
+    #error-popup .popup-content,
+    #final-confirmation-popup .popup-content {
+        margin: 20px;
+        padding: 20px;
+        height: 275px;
+    }
+
+    #confirmation-popup .popup-title,
+    #success-popup .popup-title,
+    #timer-runout-popup .popup-title,
+    #error-popup .popup-title,
+    #final-confirmation-popup .popup-title {
+        font-size: 28px
+    }
+
+    #confirmation-popup .popup-message,
+    #final-confirmation-popup .popup-message {
+        font-size: 16px
+    }
+}
