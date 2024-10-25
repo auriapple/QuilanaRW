@@ -1,16 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <?php include('header.php') ?>
-    <?php include('auth.php') ?>
-    <?php include('db_connect.php') ?>
+    <?php include('header.php'); ?>
+    <?php include('auth.php'); ?>
+    <?php include('db_connect.php'); ?>
     <title>Shared | Quilana</title>
     <link rel="stylesheet" href="meatballMenuTest/meatball.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <?php include('nav_bar.php') ?>
+    <?php include('nav_bar.php'); ?>
     <div class="content-wrapper">
         <!-- Header Container -->
         <div class="join-class-container">
@@ -31,11 +33,10 @@
         <div class="scrollable-content">
             <!-- Shared Reviewers Tab -->
             <div id="reviewer-tab" class="tab-content active">
-                <div class="course-container">              
-                        <!-- Dynamically loaded shared reviewers will be displayed here -->
+                <div class="course-container">
+                    <!-- Dynamically loaded shared reviewers will be displayed here -->
                 </div>
             </div>
-
         </div>
 
         <!-- Modal for entering reviewer code -->
@@ -45,10 +46,10 @@
                 <h2 id="join-class-title" class="popup-title">Enter Shared Code</h2>
 
                 <!-- Form to submit the reviewer code -->
-                <form id='code-frm' action="" method="POST">
+                <form id="code-frm" action="" method="POST">
                     <div class="modal-body">
                         <div class="class-code">
-                            <input type="text" name="get_code" required="required" class="code" placeholder="Reviewer Code" />
+                            <input type="text" name="get_code" required class="code" placeholder="Reviewer Code" />
                         </div>
                     </div>
                     <div class="join-button">
@@ -73,7 +74,7 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button class="btn btn-danger" id="confirm_unenroll_btn" data-student-id="<?php echo $_SESSION['login_id'] ?>">Unenroll</button>
+                        <button class="btn btn-danger" id="confirm_unenroll_btn" data-student-id="<?php echo $_SESSION['login_id']; ?>">Unenroll</button>
                     </div>
                 </div>
             </div>
@@ -95,27 +96,20 @@
                 // Button Visibility
                 function updateButtons() {
                     var activeTab = $('.tab-link.active').data('tab');
-        
                     if (activeTab === 'assessments-tab') {
-                        $('#join_class').hide();
+                        $('#joinClass').hide();
                     } else {
-                        $('#join_class').show();
+                        $('#joinClass').show();
                     }
                 }
 
                 // Tab Functionality
                 $('.tab-link').click(function() {
-                    var tab_id = $(this).attr('data-tab');
+                    var tab_id = $(this).data('tab');
                     $('.tab-link').removeClass('active');
                     $('.tab-content').removeClass('active');
                     $(this).addClass('active');
                     $("#" + tab_id).addClass('active');
-
-                    // If the "Classes" tab is clicked, hide the assessment tab
-                    if (tab_id === 'classes-tab') {
-                        $('#class-name-tab').hide();
-                        $('#assessments-tab').removeClass('active').empty(); // Optionally empty the content
-                    }
                     updateButtons();
                 });
 
@@ -124,7 +118,7 @@
 
                 $('#joinClass').click(function() {
                     $('#msg').html('');
-                    $('#join-class-popup #code-frm').get(0).reset();
+                    $('#join-class-popup #code-frm')[0].reset();
                     $('#join-class-popup').show();
                 });
 
@@ -141,61 +135,58 @@
                 // Handles code submission
                 $('#code-frm').submit(function(event) {
                     event.preventDefault();
-
                     $.ajax({
                         type: 'POST',
-                        url: 'fetch_reviewer.php', // Change to your processing PHP script
+                        url: 'fetch_reviewer.php',
                         data: $(this).serialize(),
                         dataType: 'json',
                         success: function(response) {
-                        // Close the join class popup
-                        $('#join-class-popup').hide(); 
+                            $('#join-class-popup').hide(); 
 
-                        if (response.status === 'success') {
-                            $('.course-container').append(`
-                                <div class="course-card" data-id="${response.shared_id}"> <!-- Use shared_id here -->
-                                    <div class="course-card-body">
-                                        <div class="meatball-menu-container">
-                                            <button class="meatball-menu-btn">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <div class="meatball-menu">
-                                                <a href="#" class="remove_reviewer" data-id="${response.shared_id}">Remove</a>
+                            if (response.status === 'success') {
+                                $('.course-container').append(`
+                                    <div class="course-card" data-id="${response.reviewer_id}">
+                                        <div class="course-card-body">
+                                            <div class="meatball-menu-container">
+                                                <button class="meatball-menu-btn">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="meatball-menu">
+                                                    <a href="#" class="remove_reviewer" data-id="${response.reviewer_id}">Remove</a>
+                                                </div>
+                                            </div>
+                                            <div class="course-card-title">${response.reviewer_name}</div>
+                                            <div class="course-card-text">Topic: <br>${response.topic}</div>
+                                            <div class="course-actions">
+                                                <button class="main-button" 
+                                                    id="take_reviewer" 
+                                                    data-id="${response.reviewer_id}" 
+                                                    data-type="${response.reviewer_type}" 
+                                                    type="button" 
+                                                    onclick="window.location.href='take_shared_reviewer.php?reviewer_id=${response.reviewer_id}&reviewer_type=${response.reviewer_type}'">
+                                                    Take Reviewer
+                                                </button>
                                             </div>
                                         </div>
-                                        <div class="course-card-title">${response.reviewer_name}</div>
-                                        <div class="course-card-text">Topic: <br>${response.topic}</div>
-                                        <div class="course-actions">
-                                            <button class="main-button" 
-                                                id="take_reviewer" 
-                                                data-id="${response.reviewer_id}" 
-                                                data-type="${response.reviewer_type}" 
-                                                type="button" 
-                                                onclick="window.location.href='take_reviewer.php?reviewer_id=${response.reviewer_id}&reviewer_type=${response.reviewer_type}'">
-                                                Take Reviewer
-                                            </button>
-                                        </div>
                                     </div>
-                                </div>
-                            `);
+                                `);
 
-                            Swal.fire({
-                                title: 'Success!',
-                                text: response.message,
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: response.message,
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    },
-    
-                        error: function(jqXHR, textStatus, errorThrown) {
+                                Swal.fire({
+                                    title: 'Success!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: response.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+                            }
+                        },
+                        error: function() {
                             Swal.fire({
                                 title: 'Error!',
                                 text: 'An error occurred while accessing the shared reviewer. Please try again.',
@@ -206,17 +197,16 @@
                     });
                 });
 
+                // Initialize Meatball Menu
                 initializeMeatballMenu();
 
                 function initializeMeatballMenu() {
-                    // Ensure the click event is bound to dynamically loaded elements
                     $(document).on('click', '.meatball-menu-btn', function(event) {
                         event.stopPropagation();
                         $('.meatball-menu-container').not($(this).parent()).removeClass('show');
                         $(this).parent().toggleClass('show');
                     });
 
-                    // Close the menu if clicked outside
                     $(document).on('click', function(event) {
                         if (!$(event.target).closest('.meatball-menu-container').length) {
                             $('.meatball-menu-container').removeClass('show');
@@ -224,10 +214,10 @@
                     });
                 }
 
-                                // Handle removal of shared reviewer
+                // Handle removal of shared reviewer
                 $(document).on('click', '.remove_reviewer', function(event) {
                     event.preventDefault();
-                    var sharedId = $(this).data('id'); // Get the shared ID
+                    var sharedId = $(this).data('id'); 
 
                     // Confirmation before removal
                     Swal.fire({
@@ -240,12 +230,11 @@
                         if (result.isConfirmed) {
                             $.ajax({
                                 type: 'POST',
-                                url: 'delete_shared_reviewer.php', // Change to your processing PHP script
+                                url: 'delete_shared_reviewer.php',
                                 data: { shared_id: sharedId },
                                 dataType: 'json',
                                 success: function(response) {
                                     if (response.status === 'success') {
-                                        // Remove the reviewer card from the UI
                                         $(`.course-card[data-id="${sharedId}"]`).remove();
                                         Swal.fire({
                                             title: 'Deleted!',
@@ -265,7 +254,7 @@
                                 error: function() {
                                     Swal.fire({
                                         title: 'Error!',
-                                        text: 'An error occurred while trying to delete the reviewer.',
+                                        text: 'An error occurred while deleting the shared reviewer. Please try again.',
                                         icon: 'error',
                                         confirmButtonText: 'OK'
                                     });
