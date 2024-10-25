@@ -6,7 +6,7 @@ include('db_connect.php');
 
 // Check database connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die(json_encode(['status' => 'error', 'message' => 'Database connection failed.']));
 }
 
 // Check if the user is logged in
@@ -15,11 +15,11 @@ if (!isset($_SESSION['login_id'])) {
     exit;
 }
 
-// Check if the code is set
-if (isset($_POST['get_code'])) {
-    $code = $_POST['get_code'];
+// Check if the code is set and sanitize input
+if (isset($_POST['get_code']) && !empty(trim($_POST['get_code']))) {
+    $code = trim($_POST['get_code']);
 
-    // Log POST data
+    // Log POST data (for debugging purposes)
     error_log(print_r($_POST, true));
 
     // Query the reviewer using the provided code
@@ -27,7 +27,7 @@ if (isset($_POST['get_code'])) {
     $query->bind_param("s", $code);
     
     if (!$query->execute()) {
-        echo json_encode(['status' => 'error', 'message' => 'SQL error: ' . $conn->error]);
+        echo json_encode(['status' => 'error', 'message' => 'SQL execution error: ' . $query->error]);
         exit;
     }
 
@@ -36,39 +36,60 @@ if (isset($_POST['get_code'])) {
     if ($result->num_rows > 0) {
         $reviewer = $result->fetch_assoc();
 
-        // Check if the reviewer already exists for the user
+        // Check if the user is the owner of the reviewer
         $student_id = $_SESSION['login_id']; // User's ID from the session
-        $checkQuery = $conn->prepare("SELECT * FROM user_reviewers WHERE reviewer_id = ? AND student_id = ?");
-        $checkQuery->bind_param("ii", $reviewer['reviewer_id'], $student_id);
-        $checkQuery->execute();
-        $checkResult = $checkQuery->get_result();
+        
+        $ownerCheckQuery = $conn->prepare("SELECT * FROM rw_reviewer WHERE reviewer_id = ? AND student_id = ?");
+        $ownerCheckQuery->bind_param("ii", $reviewer['reviewer_id'], $student_id);
+        $ownerCheckQuery->execute();
+        $ownerCheckResult = $ownerCheckQuery->get_result();
 
-        if ($checkResult->num_rows > 0) {
-            // Reviewer already exists
+        if ($ownerCheckResult->num_rows > 0) {
+            // User is the owner of the reviewer
             $response = [
                 'status' => 'error',
-                'message' => 'You already have this reviewer in your list.'
+                'message' => 'You cannot access your own reviewer.'
             ];
         } else {
-            // Prepare to copy the reviewer into the user_reviewers table
-            $insertQuery = $conn->prepare("INSERT INTO user_reviewers (reviewer_id, reviewer_name, topic, reviewer_type, student_id) VALUES (?, ?, ?, ?, ?)");
-            $insertQuery->bind_param("issii", $reviewer['reviewer_id'], $reviewer['reviewer_name'], $reviewer['topic'], $reviewer['reviewer_type'], $student_id);
+            // Check if the user already has this reviewer in their user_reviewers list
+            $checkQuery = $conn->prepare("SELECT * FROM user_reviewers WHERE reviewer_id = ? AND student_id = ?");
+            $checkQuery->bind_param("ii", $reviewer['reviewer_id'], $student_id);
+            $checkQuery->execute();
+            $checkResult = $checkQuery->get_result();
 
-            if ($insertQuery->execute()) {
+            if ($checkResult->num_rows > 0) {
+                // User already has this reviewer in their user_reviewers list
                 $response = [
-                    'status' => 'success',
-                    'reviewer_id' => $reviewer['reviewer_id'],
-                    'reviewer_name' => $reviewer['reviewer_name'],
-                    'topic' => $reviewer['topic'],
-                    'reviewer_type' => $reviewer['reviewer_type'],
-                    'message' => 'Reviewer found and copied successfully.'
+                    'status' => 'error',
+                    'message' => 'You already have this reviewer in your list.'
                 ];
             } else {
-                $response = ['status' => 'error', 'message' => 'Insert error: ' . $insertQuery->error];
+                // Prepare to copy the reviewer into the user_reviewers table
+                $insertQuery = $conn->prepare("INSERT INTO user_reviewers (reviewer_id, reviewer_name, topic, reviewer_type, student_id) VALUES (?, ?, ?, ?, ?)");
+                $insertQuery->bind_param("issii", $reviewer['reviewer_id'], $reviewer['reviewer_name'], $reviewer['topic'], $reviewer['reviewer_type'], $student_id);
+
+                if ($insertQuery->execute()) {
+                    $response = [
+                        'status' => 'success',
+                        'reviewer_id' => $reviewer['reviewer_id'],
+                        'reviewer_name' => $reviewer['reviewer_name'],
+                        'topic' => $reviewer['topic'],
+                        'reviewer_type' => $reviewer['reviewer_type'],
+                        'message' => 'Reviewer found and copied successfully.'
+                    ];
+                } else {
+                    $response = [
+                        'status' => 'error',
+                        'message' => 'Insert error: ' . $insertQuery->error
+                    ];
+                }
+                $insertQuery->close();
             }
+
+            $checkQuery->close();
         }
         
-        $checkQuery->close();
+        $ownerCheckQuery->close();
     } else {
         $response = ['status' => 'error', 'message' => 'No reviewer found with the given code.'];
     }
@@ -76,6 +97,6 @@ if (isset($_POST['get_code'])) {
     $query->close();
     echo json_encode($response);
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'No code provided.']);
+    echo json_encode(['status' => 'error', 'message' => 'No valid code provided.']);
 }
 ?>

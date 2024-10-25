@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,7 +33,40 @@
             <!-- Shared Reviewers Tab -->
             <div id="reviewer-tab" class="tab-content active">
                 <div class="course-container">
-                    <!-- Dynamically loaded shared reviewers will be displayed here -->
+                    <?php
+                    $qry = $conn->query("SELECT * FROM user_reviewers WHERE student_id = '".$_SESSION['login_id']."' ORDER BY topic ASC");
+                    if ($qry->num_rows > 0) {
+                        while ($row = $qry->fetch_assoc()) {
+                            $reviewer_id = $row['reviewer_id'];
+                    ?>
+                        <div class="course-card" data-id="<?php echo $reviewer_id; ?>"> <!-- Added data-id here -->
+                            <div class="course-card-body">
+                                <div class="meatball-menu-container">
+                                    <button class="meatball-menu-btn">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="meatball-menu">                                    
+                                        <a href="#" class="remove_reviewer" data-id="<?php echo $reviewer_id ?>">Remove</a>
+                                    </div>
+                                </div>
+                                <div class="course-card-title"><?php echo $row['reviewer_name'] ?></div>
+                                <div class="course-card-text">Topic: <br><?php echo $row['topic'] ?></div>
+                                <div class="course-actions">                
+                                    <button class="main-button" 
+                                        id="take_reviewer" 
+                                        data-id="<?php echo $row['reviewer_id']; ?>" 
+                                        data-type="<?php echo $row['reviewer_type']; ?>" 
+                                        type="button" 
+                                        onclick="window.location.href='take_shared_reviewer.php?reviewer_id=<?php echo $row['reviewer_id']; ?>&reviewer_type=<?php echo $row['reviewer_type']; ?>'">
+                                        Take Reviewer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php
+                        }
+                    }
+                    ?>
                 </div>
             </div>
         </div>
@@ -56,27 +88,6 @@
                         <button id="join" type="submit" class="secondary-button" name="join_by_code">Enter</button>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <!-- Modal for Unenrolling -->
-        <div class="modal fade" id="unenroll_modal" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Unenroll from Class</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Are you sure you want to unenroll from <strong id="unenroll_class_name" style="font-weight: bold;"></strong>?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button class="btn btn-danger" id="confirm_unenroll_btn" data-student-id="<?php echo $_SESSION['login_id']; ?>">Unenroll</button>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -144,33 +155,6 @@
                             $('#join-class-popup').hide(); 
 
                             if (response.status === 'success') {
-                                $('.course-container').append(`
-                                    <div class="course-card" data-id="${response.reviewer_id}">
-                                        <div class="course-card-body">
-                                            <div class="meatball-menu-container">
-                                                <button class="meatball-menu-btn">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <div class="meatball-menu">
-                                                    <a href="#" class="remove_reviewer" data-id="${response.reviewer_id}">Remove</a>
-                                                </div>
-                                            </div>
-                                            <div class="course-card-title">${response.reviewer_name}</div>
-                                            <div class="course-card-text">Topic: <br>${response.topic}</div>
-                                            <div class="course-actions">
-                                                <button class="main-button" 
-                                                    id="take_reviewer" 
-                                                    data-id="${response.reviewer_id}" 
-                                                    data-type="${response.reviewer_type}" 
-                                                    type="button" 
-                                                    onclick="window.location.href='take_shared_reviewer.php?reviewer_id=${response.reviewer_id}&reviewer_type=${response.reviewer_type}'">
-                                                    Take Reviewer
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `);
-
                                 Swal.fire({
                                     title: 'Success!',
                                     text: response.message,
@@ -230,11 +214,12 @@
                         if (result.isConfirmed) {
                             $.ajax({
                                 type: 'POST',
-                                url: 'delete_shared_reviewer.php',
+                                url: 'remove_shared_reviewer.php',
                                 data: { shared_id: sharedId },
                                 dataType: 'json',
                                 success: function(response) {
                                     if (response.status === 'success') {
+                                        // Remove the course card from display
                                         $(`.course-card[data-id="${sharedId}"]`).remove();
                                         Swal.fire({
                                             title: 'Deleted!',
@@ -263,7 +248,6 @@
                         }
                     });
                 });
-
             });
         </script>
     </div>
