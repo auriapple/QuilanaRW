@@ -6,7 +6,6 @@
     <?php include('db_connect.php') ?>
     <title>Reviewer | Quilana</title>
     <link rel="stylesheet" href="meatballMenuTest/meatball.css">
-    <link rel="stylesheet" href="assets/css/classes.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -73,42 +72,42 @@
             </div>
 
             <!-- ADD/EDIT Modal -->
-            <div class="popup-overlay" id="addReviewerModal">
-                <div class="popup-content" role="document">
-                    <button class="popup-close">&times;</button>
-                    <h2 id="add-program-title" class="popup-title">Add Reviewer</h2>
-
-                    <!-- Form to add a new reviewer -->
-                    <form id="addReviewerForm" action="" method="POST">
-                        <div class="modal-body">
-                            <div id="msg"></div>
-                            <input type="hidden" id="reviewer_id" name="reviewer_id" />
-                            
-                            <div class="form-group">
-                                <label for="reviewer_type">Select Reviewer Type</label>
-                                <select id="reviewer_type" name="reviewer_type" class="popup-input" required>
-                                    <option value="1">Test</option>
-                                    <option value="2">Flashcard</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="reviewer_name">Reviewer Name</label>
-                                <input type="text" id="reviewer_name" name="reviewer_name" class="popup-input" placeholder="Enter Reviewer Name" required />
-                            </div>
-
-                            <div class="form-group">
-                                <label for="topic">Topic</label>
-                                <input type="text" id="topic" name="topic" class="popup-input" placeholder="Enter Topic" required />
-                            </div>
+            <div class="modal fade" id="addReviewerModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="addReviewerModalLabel">Add Reviewer</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
-                        <div class="modal-footer">
-                            <button type="submit" class="secondary-button">Save Reviewer</button>
-                        </div>
-                    </form>
+                        <form id="addReviewerForm" action="" method="POST">
+                            <div class="modal-body">
+                                <div id="msg"></div>
+                                <input type="hidden" id="reviewer_id" name="reviewer_id">
+                                <div class="form-group">
+                                    <label for="reviewer_type">Select Reviewer Type</label>
+                                    <select id="reviewer_type" name="reviewer_type" class="form-control" required>
+                                        <option value="1">Test</option>
+                                        <option value="2">Flashcard</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reviewer_name">Reviewer Name</label>
+                                    <input type="text" id="reviewer_name" name="reviewer_name" class="form-control" placeholder="Enter Reviewer Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="topic">Topic</label>
+                                    <input type="text" id="topic" name="topic" class="form-control" placeholder="Enter Topic" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Save Reviewer</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-
 
            <!-- Delete Confirmation Modal -->
             <div class="modal fade" id="delete_assessment_modal" tabindex="-1" role="dialog">
