@@ -108,6 +108,7 @@ if (!isset($_SESSION['login_user_type'])) {
                         JOIN rw_student_submission ss ON sr.rw_submission_id = ss.rw_submission_id
                         JOIN rw_reviewer r ON sr.reviewer_id = r.reviewer_id
                         WHERE r.reviewer_type = 1 
+                        AND ss.student_id = '".$_SESSION['login_id']."'
                         ORDER BY ss.date_taken DESC
                     ");
 
