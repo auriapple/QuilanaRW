@@ -75,7 +75,7 @@ if (isset($_POST['get_code']) && !empty(trim($_POST['get_code']))) {
                         'reviewer_name' => $reviewer['reviewer_name'],
                         'topic' => $reviewer['topic'],
                         'reviewer_type' => $reviewer['reviewer_type'],
-                        'message' => 'Reviewer found and copied successfully.'
+                        'message' => 'The shared reviewer is now available for you.'
                     ];
                 } else {
                     $response = [

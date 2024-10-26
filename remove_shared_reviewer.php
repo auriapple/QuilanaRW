@@ -10,7 +10,7 @@ if (isset($_POST['shared_id'])) {
     $stmt->bind_param("is", $shared_id, $_SESSION['login_id']); // Assuming 'login_id' is stored in session
 
     if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Reviewer has been removed successfully.']);
+        echo json_encode(['status' => 'success', 'message' => 'Shared reviewer has been removed successfully.']);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Error occurred while removing the reviewer.']);
     }
