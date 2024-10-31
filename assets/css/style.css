@@ -810,6 +810,9 @@ body {
     box-sizing: border-box;
 }
 
+.questions-container::-webkit-scrollbar {
+    display: none;
+}
 
 /* Question Styles */
 .question {

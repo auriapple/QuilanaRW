@@ -117,7 +117,7 @@ if ($assessment_mode == 1) { // Normal Mode
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-            max-height: 50vh;
+            max-height: 60vh;
             overflow-y: auto;
             width: 100% !important;
             margin: 0 !important;
@@ -127,6 +127,9 @@ if ($assessment_mode == 1) { // Normal Mode
             padding: 15px;
             border-left: 4px solid #4A4CA6;
             background-color: #f9f9f9;
+        }
+        .question p {
+            margin-bottom: 16px !important;
         }
         .question-number {
             font-weight: bold;
@@ -172,7 +175,7 @@ if ($assessment_mode == 1) { // Normal Mode
             text-align: center !important;
             border: none;
             color: #4a4a4a;
-            border-right: 1px solid rgba(59, 39, 110, 0.80);
+            border-right: 1px solid rgba(59, 39, 110, 0.80) !important;
             width: 20%;
             border-bottom: none !important;
             border-top: none !important;
