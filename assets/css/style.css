@@ -810,7 +810,8 @@ body {
     box-sizing: border-box;
 }
 
-.questions-container::-webkit-scrollbar {
+.questions-container::-webkit-scrollbar,
+.question-container::-webkit-scrollbar {
     display: none;
 }
 

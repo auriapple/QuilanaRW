@@ -140,9 +140,6 @@ if ($assessment_mode == 1) { // Normal Mode
             margin-left: 20px;
             margin-bottom: 8px;
         }
-        .checked {
-            margin-left: -5px;
-        }
         .option label {
             display: flex;
             align-items: center;
@@ -152,15 +149,11 @@ if ($assessment_mode == 1) { // Normal Mode
             margin-right: 10px;
             accent-color: #4A4CA6;
         }
-        .time-limit {
-            margin-top: 10px;
-            font-style: italic;
-            color: #666;
-        }
         .checked {
             background-color: #e6e6fa;
             padding: 5px;
             border-radius: 4px;
+            margin-left: -5px;
         }
         table {
             width: 100%;
