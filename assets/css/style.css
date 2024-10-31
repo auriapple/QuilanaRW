@@ -707,7 +707,7 @@ body {
 [id^=viewClassDetails_],
 [id^=takeAssessment_],
 [id^=viewAssessment_],
-#viewClassDetails {
+#classes-tab #viewClassDetails {
     width: calc(100% - 40px);
     border-radius: 5px;
     padding: 12px 30px;
@@ -715,18 +715,6 @@ body {
     position: absolute;
     bottom: 20px;
     outline: none !important;
-}
-
-td #viewClassDetails {
-    width: 100px;
-    height: 32px;
-    margin: 0;
-    bottom: 0px;
-    position: relative;
-    font-size: 14px;
-    font-weight: normal;
-    padding: 5px;
-    text-align: center;
 }
 
 #studentScoresTitle {
@@ -746,7 +734,7 @@ td #viewClassDetails {
     width: 135px;
 }
 .btn-container .btn {
-    min-width: 100px;
+    min-width: 115px;
     padding: 5px 10px;
     font-size: 15px;
     text-align: center;
@@ -755,9 +743,9 @@ td #viewClassDetails {
     justify-content: center; 
     align-items: center;
 }
-
-
-
+.btn-view {
+    min-width: 90px !important;
+}
 /* END */
 
 /* POPUPS */

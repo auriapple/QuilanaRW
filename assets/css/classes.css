@@ -155,6 +155,12 @@
 #delete-assessment-popup .modal-footer {
     gap: 20px;
 }
+#program-details-popup .modal-footer,
+#class-details-popup .modal-footer {
+    border: none !important;
+    padding: 0 !important;
+    justify-content: center !important;
+}
 
 /* Table Design */
 .modal-body .tabcontent {

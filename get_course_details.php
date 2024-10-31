@@ -38,12 +38,15 @@
 
         if ($qry_class->num_rows > 0) {
             while ($class = $qry_class->fetch_assoc()) {
-
                 echo '<tr>
                         <td>' . $class['class_name'] . '</td>
                         <td>' . $class['subject'] . '</td>
-                        <td>' ?> <button id="viewClassDetails" class="main-button view_class_details action_vcd" data-id="<?php echo $class['class_id']?>"  type="button">View Class</button> <?php '</td>
-                    </tr>';
+                        <td>
+                            <div class="btn-container">
+                                <button id="viewClassDetails" class="btn btn-primary btn-sm view_class_details action_vcd" data-id="' . $class['class_id'] . '" type="button">View Class</button>
+                            </div>
+                        </td>
+                      </tr>';
             }
         } else {
             // Show an empty row if no class data is available
@@ -59,6 +62,5 @@
 
     $conn->close();
     ?>
-
 </body>
 </html>

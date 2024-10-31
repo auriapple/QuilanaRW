@@ -13,18 +13,25 @@ if (isset($_GET['class_id'])) {
         echo "<p><strong>Class not found.</strong></p>";
     }
 
-   // Fetch the assessments with related details
-   $qry_assessments = $conn->query("
-   SELECT a.assessment_id, a.assessment_name, aa.date_administered, 
-          SUM(q.total_points) AS total_points, 
-          CASE WHEN au.upload_id IS NOT NULL THEN 1 ELSE 0 END AS is_uploaded
-   FROM administer_assessment aa
-   JOIN assessment a ON aa.assessment_id = a.assessment_id
-   JOIN questions q ON q.assessment_id = a.assessment_id
-   LEFT JOIN assessment_uploads au ON a.assessment_id = au.assessment_id AND aa.class_id = au.class_id
-   WHERE aa.class_id = '$class_id'
-   GROUP BY a.assessment_id, a.assessment_name, aa.date_administered
-   ");
+    // Fetch the assessments with related details
+    $qry_assessments = $conn->query("
+        SELECT a.assessment_id, a.assessment_name, aa.date_administered, 
+                CASE 
+                    WHEN a.assessment_mode IN (1, 2) THEN SUM(q.total_points)
+                    WHEN a.assessment_mode = 3 THEN COUNT(q.question_id) * a.max_points
+                    ELSE 0
+                END AS total_points,
+                CASE 
+                    WHEN au.upload_id IS NOT NULL THEN 1 
+                    ELSE 0 
+                END AS is_uploaded
+        FROM administer_assessment aa
+        JOIN assessment a ON aa.assessment_id = a.assessment_id
+        JOIN questions q ON q.assessment_id = a.assessment_id
+        LEFT JOIN assessment_uploads au ON a.assessment_id = au.assessment_id AND aa.class_id = au.class_id
+        WHERE aa.class_id = '$class_id'
+        GROUP BY a.assessment_id, a.assessment_name, aa.date_administered
+    ");
 
     if (!$qry_assessments) {
         die("Error: " . $conn->error);
@@ -35,7 +42,8 @@ if (isset($_GET['class_id'])) {
         SELECT s.student_id, s.student_number, CONCAT(s.lastname, ', ', s.firstname) AS student_name, se.status
         FROM student_enrollment se
         JOIN student s ON se.student_id = s.student_id
-        WHERE se.class_id = '$class_id' AND se.status != 2
+        WHERE se.class_id = '$class_id' AND se.status = 1
+        ORDER BY student_name ASC
     ");
 
     if (!$qry_student) {
@@ -77,7 +85,7 @@ if (isset($_GET['class_id'])) {
                                     <td>' . htmlspecialchars($assessment['total_points']) . '</td>
                                     <td>
                                         <div class="btn-container">
-                                            <a href="view_assessment.php?id=' . htmlspecialchars($assessment['assessment_id']) . '&class_id=' . htmlspecialchars($class_id) . '" class="btn btn-primary btn-sm">View</a>
+                                            <a href="view_assessment.php?id=' . htmlspecialchars($assessment['assessment_id']) . '&class_id=' . htmlspecialchars($class_id) . '" class="btn btn-primary btn-sm btn-view">View</a>
                                             <button class="btn ' . ($assessment['is_uploaded'] ? 'btn-danger' : 'btn-success') . ' btn-sm upload-btn" 
                                                     onclick="toggleUpload(' . htmlspecialchars($assessment['assessment_id']) . ', ' . htmlspecialchars($class_id) . ', ' . $assessment['is_uploaded'] . ')">
                                                 ' . ($assessment['is_uploaded'] ? 'Undo Upload' : 'Upload') . '
@@ -118,32 +126,13 @@ if (isset($_GET['class_id'])) {
                                 <td>' . htmlspecialchars($student['student_name']) . '</td>
                                 <td class="status">' . (($student['status'] == 0) ? 'Pending' : 'Enrolled') . '</td>
                                 <td>';
-                        if ($student['status'] == 0) {
-                            echo '<div class="btn-container">
-                                    <button class="btn btn-success btn-sm equal-size" 
-                                            data-class-id="' . $class_id . '" 
-                                            data-student-id="' . $student['student_id'] . '" 
-                                            data-status="1" 
-                                            type="button">Accept</button>
-                                    <button class="btn btn-danger btn-sm equal-size" 
-                                            data-class-id="' . $class_id . '" 
-                                            data-student-id="' . $student['student_id'] . '" 
-                                            data-status="2" 
-                                            type="button">Reject</button>
-                                </div>';
-                        } else {
-                            echo '<div class="btn-container">
-                                    <button class="btn btn-primary btn-sm equal-size" 
-                                            onclick="showStudentScores(' . $student['student_id'] . ', \'' . $student['student_name'] . '\')" 
-                                            type="button">Scores</button>
-                                   <button class="btn btn-danger btn-sm equal-size" 
-                                            data-class-id="' . $class_id . '" 
-                                            data-student-id="' . $student['student_id'] . '" 
-                                            data-status="2" 
-                                            type="button"
-                                            onclick="confirmStudentRemoval(' . $student['student_id'] . ', ' . $class_id . ')">Remove</button>
-                                </div>';
-                        }
+                        
+                        echo '<div class="btn-container">
+                                <button class="btn btn-primary btn-sm equal-size" 
+                                    onclick="showStudentScores(' . $student['student_id'] . ', \'' . $student['student_name'] . '\')" 
+                                    type="button">Scores
+                                </button>     
+                            </div>';
                         echo '</td></tr>';
                     }
                 } else {
@@ -242,68 +231,6 @@ function showStudentScores(studentId, studentName) {
         });
 }
 
-
-function removeAdministeredAssessment(assessmentId, classId, studentId, administerId) {
-    if (confirm("Are you sure you want to remove this administered assessment for this class and student?")) {
-        fetch('remove_administered_assessment.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'assessment_id=' + assessmentId + 
-                  '&class_id=' + classId + 
-                  '&student_id=' + studentId + 
-                  '&administer_id=' + administerId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Administered assessment removed successfully for this class and student");
-                location.reload();
-            } else {
-                alert("Failed to remove administered assessment: " + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("An error occurred while removing the administered assessment");
-        });
-    }
-}
-
-
-
-function confirmStudentRemoval(studentId, classId) {
-    var userConfirmed = confirm("Are you sure you want to remove this student from the class?");
-    
-
-    if (userConfirmed) {
-        fetch('remove_student.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'student_id=' + studentId + '&class_id=' + classId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Student removed successfully from the class.");
-                location.reload(); 
-            } else {
-                alert("Failed to remove student: " + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("An error occurred while removing the student.");
-        });
-    } else {
-        console.log("User canceled the removal action.");
-    }
-}
-
-
 document.addEventListener('DOMContentLoaded', function() {
     var defaultTab = document.querySelector('.tab-link.active');
     if (defaultTab) {
@@ -312,6 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById(defaultTabName).classList.add("active");
     }
 });
+
 function toggleUpload(assessmentId, classId, isUploaded) {
     const action = isUploaded ? 'remove' : 'upload';
     const confirmMessage = isUploaded 

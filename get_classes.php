@@ -22,8 +22,6 @@
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <div class="meatball-menu">
-                                        <a href="#" class="edit_class" data-class-id="<?php echo $row['class_id'] ?>" data-class-name="<?php echo $row['class_name']?>" data-subject="<?php echo $row['subject']?>">Edit</a>
-                                        <a href="#" class="delete_class" data-class-id="<?php echo $row['class_id'] ?>" data-class-name="<?php echo $row['class_name'] ?>" data-subject="<?php echo $row['subject']?>">Delete</a>
                                         <a href="#" class="get_code" data-class-id="<?php echo $row['class_id'] ?>">Get Code</a>
                                     </div>
                                 </div>
