@@ -44,8 +44,8 @@ if (!isset($_SESSION['login_user_type'])) {
                         </div>
                     </div>
                     <!-- Total Number of Uploads -->
-                    <div class="card" style="background-color: #FADEFF"> 
-                        <img class="icons" src="image/DashboardClassesIcon.png" alt="Uploads Icon">
+                    <div class="card" style="background-color: #C5F1C5"> 
+                        <img class="icons" src="image/DashboardSharedIcon.png" alt="Shared Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalUploads 
                                                 FROM assessment_uploads au
@@ -113,7 +113,7 @@ if (!isset($_SESSION['login_user_type'])) {
                             echo "</div>";
                         }
                     } else {
-                        echo "<p class='no-uploads'>No recent uploads.</p>";
+                        echo "<p class='no-assessments'>No recent uploads.</p>";
                     }
                     ?>
                 </div>
@@ -123,10 +123,12 @@ if (!isset($_SESSION['login_user_type'])) {
             <div class="dashboard-calendar">
                 <div class="wrapper">
                     <header>
+                        <div class="icons">
+                            <span id="prev" class="material-symbols-rounded">chevron_left</span>
+                        </div>
                         <p class="current-date"></p>
                         <div class="icons">
-                        <span id="prev" class="material-symbols-rounded">chevron_left</span>
-                        <span id="next" class="material-symbols-rounded">chevron_right</span>
+                            <span id="next" class="material-symbols-rounded">chevron_right</span>
                         </div>
                     </header>
                     <div class="calendar">

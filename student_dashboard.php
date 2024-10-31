@@ -80,8 +80,8 @@ if (!isset($_SESSION['login_user_type'])) {
                         </div>
                     </div>
                     <!-- Total Number of Shared Reviewers -->
-                    <div class="card" style="background-color: #FCDCE9;"> 
-                        <img class="icons" src="image/SharedIcon.png" alt="Share Icon">
+                    <div class="card" style="background-color: #C5F1C5;"> 
+                        <img class="icons" src="image/DashboardSharedIcon.png" alt="Shared Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalShared 
                                             FROM user_reviewers ur 
@@ -159,10 +159,12 @@ if (!isset($_SESSION['login_user_type'])) {
             <div class="dashboard-calendar">
                 <div class="wrapper">
                     <header>
+                        <div class="icons">
+                            <span id="prev" class="material-symbols-rounded">chevron_left</span>
+                        </div>
                         <p class="current-date"></p>
                         <div class="icons">
-                        <span id="prev" class="material-symbols-rounded">chevron_left</span>
-                        <span id="next" class="material-symbols-rounded">chevron_right</span>
+                            <span id="next" class="material-symbols-rounded">chevron_right</span>
                         </div>
                     </header>
                     <div class="calendar">
