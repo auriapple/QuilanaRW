@@ -44,10 +44,8 @@ if ($stmt = $conn->prepare($query)) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f4f4;
-            overflow: hidden;
+        .reviewer {
+            padding: 10px;
         }
         .reviewer-details {
             background-color: #fff;
@@ -55,7 +53,6 @@ if ($stmt = $conn->prepare($query)) {
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            margin-right: 26px;
         }
         .reviewer-details h2 {
             font-size: 1.5em;
@@ -69,17 +66,46 @@ if ($stmt = $conn->prepare($query)) {
             color: #666;
         }
         .card-full-width {
-            width: 98%;
+            width: 100%;
             margin-bottom: 20px;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            border: none !important;
+        }
+        .card-header {
+            background-color: #E0E0EC !important;
+            font-weight: bold;
+            border-bottom: none !important;
         }
         .card-body {
-            max-height: 50vh;
+            height: 55vh;
+            max-height: auto;
             overflow-y: auto;
         }
-        .list-group-item {
-            margin-top: 10px;
-            border-left: 4px solid #4A4CA6;
+        .card-body::-webkit-scrollbar {
+            display: none;
         }
+
+        .list-group {
+            gap: 15px;
+        }
+        .list-group-item {
+            border-left: 4px solid #4A4CA6 !important;
+            background-color: #f9f9f9 !important;
+        }
+        .list-group-item h6 {
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        .list-group-item p {
+            margin: 0;
+        }
+        .list-group-item .question-number {
+            font-weight: bold;
+            color: #4A4CA6;
+            margin-bottom: 10px;
+        }
+
         .back-arrow {
             font-size: 24px; 
             margin-top: 10px;
@@ -100,6 +126,15 @@ if ($stmt = $conn->prepare($query)) {
             background-color: #3a3b8c;
             border-color: #3a3b8c;
         }
+
+        .float-right {
+            display: flex;
+            gap: 8px;
+        }
+        .mt-3 {
+            display: flex;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -112,91 +147,110 @@ if ($stmt = $conn->prepare($query)) {
             </a>
         </div>
 
-        <div class="reviewer-details">
-            <h2><?php echo $reviewer_name; ?></h2>
-            <p><strong>Reviewer Type:</strong> <?php echo $reviewer_type_name; ?></p>
-            <p><strong>Topic:</strong> <?php echo $topic; ?></p>
-            <button class="btn btn-primary mt-3" id="add_item_btn">
-                <i class="fa fa-plus"></i> Add <?php echo ($reviewer_type == 1) ? 'Question' : 'Flashcard'; ?>
-            </button>
-        </div>
+        <div class="reviewer">
+            <div class="reviewer-details">
+                <h2><?php echo $reviewer_name; ?></h2>
+                <p><strong>Reviewer Type:</strong> <?php echo $reviewer_type_name; ?></p>
+                <p><strong>Topic:</strong> <?php echo $topic; ?></p>
+                <button class="btn btn-primary mt-3" id="add_item_btn">
+                    <i class="fa fa-plus"></i> Add <?php echo ($reviewer_type == 1) ? 'Question' : 'Flashcard'; ?>
+                </button>
+            </div>
 
-        <?php if ($reviewer_type == 1): // Test type ?>
-            <?php
-            $questions_query = "SELECT * FROM rw_questions WHERE reviewer_id = ? ORDER BY order_by ASC";
-            if ($stmt = $conn->prepare($questions_query)) {
-                $stmt->bind_param("i", $reviewer_id);
-                $stmt->execute();
-                $questions_result = $stmt->get_result();
+            <?php if ($reviewer_type == 1): // Test type ?>
+                <?php
+                $questions_query = "
+                    SELECT * 
+                    FROM rw_questions 
+                    WHERE reviewer_id = ? 
+                    ORDER BY order_by ASC
+                ";
+                $question_number = 1;
 
-                if ($questions_result->num_rows > 0) {
-                    echo '<div class="card card-full-width">';
-                    echo '<div class="card-header">Questions</div>';
-                    echo '<div class="card-body">';
-                    echo '<ul class="list-group">';
-                    
-                    while ($row = $questions_result->fetch_assoc()) {
-                        echo '<li class="list-group-item">';
-                        echo htmlspecialchars($row['question']);
-                        echo '<p><strong>Points:</strong> ' . htmlspecialchars($row['total_points']) . '</p>';
-                        echo '<div class="float-right">';
-                        echo '<button class="btn btn-sm btn-outline-primary edit_question me-2" data-id="' . htmlspecialchars($row['rw_question_id']) . '"><i class="fa fa-edit"></i></button>';
-                        echo '<button class="btn btn-sm btn-outline-danger remove_question" data-id="' . htmlspecialchars($row['rw_question_id']) . '"><i class="fa fa-trash"></i></button>';
+                if ($stmt = $conn->prepare($questions_query)) {
+                    $stmt->bind_param("i", $reviewer_id);
+                    $stmt->execute();
+                    $questions_result = $stmt->get_result();
+
+                    if ($questions_result->num_rows > 0) {
+                        echo '<div class="card card-full-width">';
+                        echo '<div class="card-header">Questions</div>';
+                        echo '<div class="card-body">';
+                        echo '<ul class="list-group">';
+                        
+                        while ($row = $questions_result->fetch_assoc()) {
+                            echo '<li class="list-group-item">';
+                            echo '<div class="question-number">Question ' . $question_number . ':</div>';
+                            echo '<h6>' . htmlspecialchars($row['question']) . '</h6>';
+                            
+                            echo '<p><strong>Points:</strong> ' . htmlspecialchars($row['total_points']) . '</p>';
+                            
+                            echo '<div class="float-right">';
+                            echo '<button class="btn btn-sm btn-outline-primary edit_question me-2" data-id="' . htmlspecialchars($row['rw_question_id']) . '"><i class="fa fa-edit"></i></button>';
+                            echo '<button class="btn btn-sm btn-outline-danger remove_question" data-id="' . htmlspecialchars($row['rw_question_id']) . '"><i class="fa fa-trash"></i></button>';
+                            echo '</div>';
+                            echo '</li>';
+
+                            $question_number++;
+                        } 
+                        echo '</ul>';
                         echo '</div>';
-                        echo '</li>';
-                    }
-                    
-                    echo '</ul>';
-                    echo '</div>';
-                    echo '</div>';
-                } else {
-                    echo '<p class="alert alert-info" style="margin-right: 20px;">No questions found for this reviewer. Start by adding some questions!</p>';
-                }
-
-                $stmt->close();
-            } else {
-                echo '<p class="alert alert-danger" style="margin-right: 20px;">Error preparing the SQL query for questions.</p>';
-            }
-            ?>
-        <?php else: // Flashcard type ?>
-            <?php
-            $flashcards_query = "SELECT * FROM rw_flashcard WHERE reviewer_id = ? ORDER BY flashcard_id ASC";
-            if ($stmt = $conn->prepare($flashcards_query)) {
-                $stmt->bind_param("i", $reviewer_id);
-                $stmt->execute();
-                $flashcards_result = $stmt->get_result();
-
-                if ($flashcards_result->num_rows > 0) {
-                    echo '<div class="card card-full-width">';
-                    echo '<div class="card-header">Flashcards</div>';
-                    echo '<div class="card-body">';
-                    echo '<ul class="list-group">';
-                    
-                    while ($row = $flashcards_result->fetch_assoc()) {
-                        echo '<li class="list-group-item">';
-                        echo '<strong>Term:</strong> ' . htmlspecialchars($row['term']);
-                        echo '<br><strong>Definition:</strong> ' . htmlspecialchars($row['definition']);
-                        echo '<div class="float-right">';
-                        echo '<button class="btn btn-sm btn-outline-primary edit_flashcard me-2" data-id="' . htmlspecialchars($row['flashcard_id']) . '"><i class="fa fa-edit"></i></button>';
-                        echo '<button class="btn btn-sm btn-outline-danger remove_flashcard" data-id="' . htmlspecialchars($row['flashcard_id']) . '"><i class="fa fa-trash"></i></button>';
                         echo '</div>';
-                        echo '</li>';
+                    } else {
+                        echo '<p class="alert alert-info">No questions found for this reviewer. Start by adding some questions!</p>';
                     }
-                    
-                    echo '</ul>';
-                    echo '</div>';
-                    echo '</div>';
-                } else {
-                    echo '<p class="alert alert-info" style="margin-right: 20px;">No flashcards found for this reviewer. Start by adding some flashcards!</p>';
-                }
 
-                $stmt->close();
-            } else {
-                echo '<p class="alert alert-danger" style="margin-right: 20px;">Error preparing the SQL query for flashcards.</p>';
-            }
-            ?>
-        <?php endif; ?>
-    </div>
+                    $stmt->close();
+                } else {
+                    echo '<p class="alert alert-danger">Error preparing the SQL query for questions.</p>';
+                }
+                ?>
+            <?php else: // Flashcard type ?>
+                <?php
+                $flashcards_query = "
+                    SELECT * 
+                    FROM rw_flashcard 
+                    WHERE reviewer_id = ? 
+                     BY flashcard_id ASC
+                ";
+
+                if ($stmt = $conn->prepare($flashcards_query)) {
+                    $stmt->bind_param("i", $reviewer_id);
+                    $stmt->execute();
+                    $flashcards_result = $stmt->get_result();
+
+                    if ($flashcards_result->num_rows > 0) {
+                        echo '<div class="card card-full-width">';
+                        echo '<div class="card-header">Flashcards</div>';
+                        echo '<div class="card-body">';
+                        echo '<ul class="list-group">';
+                        
+                        while ($row = $flashcards_result->fetch_assoc()) {
+                            echo '<li class="list-group-item">';
+                            echo '<strong>Term:</strong> ' . htmlspecialchars($row['term']);
+                            echo '<br><strong>Definition:</strong> ' . htmlspecialchars($row['definition']);
+                            
+                            echo '<div class="float-right">';
+                            echo '<button class="btn btn-sm btn-outline-primary edit_flashcard me-2" data-id="' . htmlspecialchars($row['flashcard_id']) . '"><i class="fa fa-edit"></i></button>';
+                            echo '<button class="btn btn-sm btn-outline-danger remove_flashcard" data-id="' . htmlspecialchars($row['flashcard_id']) . '"><i class="fa fa-trash"></i></button>';
+                            echo '</div>';
+                            echo '</li>';
+                        }
+                        echo '</ul>';
+                        echo '</div>';
+                        echo '</div>';
+                    } else {
+                        echo '<p class="alert alert-info">No flashcards found for this reviewer. Start by adding some flashcards!</p>';
+                    }
+
+                    $stmt->close();
+                } else {
+                    echo '<p class="alert alert-danger">Error preparing the SQL query for flashcards.</p>';
+                }
+                ?>
+            <?php endif; ?>
+        </div>     
+    </div>   
 
 <!-- Modal for Adding/Editing Questions -->
 <div class="modal fade" id="manage_question" tabindex="-1" aria-labelledby="manageQuestionLabel" aria-hidden="true">
