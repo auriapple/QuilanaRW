@@ -6,6 +6,7 @@
     <?php include('db_connect.php'); ?>
     <title>Shared | Quilana</title>
     <link rel="stylesheet" href="meatballMenuTest/meatball.css">
+    <link rel="stylesheet" href="assets/css/classes.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -62,6 +63,8 @@
                         </div>
                     <?php
                         }
+                    } else {
+                        echo "<p class='no-assessments'>No available shared reviewers</p>";
                     }
                     ?>
                 </div>
@@ -98,7 +101,7 @@
             $(document).ready(function() {
                 $('#joinClass').click(function() {
                     $('#join-class-popup #code-frm')[0].reset();
-                    $('#join-class-popup').show();
+                    $('#join-class-popup').css('display', 'flex');
                 });
 
                 $('#modal-close').click(function() {
@@ -147,14 +150,24 @@
                                     title: 'Success!',
                                     text: response.message,
                                     icon: 'success',
-                                    confirmButtonText: 'OK'
+                                    confirmButtonText: 'OK',
+                                    allowOutsideClick: false,
+                                    customClass: {
+                                        popup: 'popup-content',
+                                        confirmButton: 'secondary-button'
+                                    }
                                 });
                             } else {
                                 Swal.fire({
                                     title: 'Error!',
                                     text: response.message,
                                     icon: 'error',
-                                    confirmButtonText: 'OK'
+                                    confirmButtonText: 'OK',
+                                    allowOutsideClick: false,
+                                    customClass: {
+                                        popup: 'popup-content',
+                                        confirmButton: 'secondary-button'
+                                    }
                                 });
                             }
                         },
@@ -163,7 +176,12 @@
                                 title: 'Error!',
                                 text: 'An error occurred while accessing the shared reviewer. Please try again.',
                                 icon: 'error',
-                                confirmButtonText: 'OK'
+                                confirmButtonText: 'OK',
+                                allowOutsideClick: false,
+                                customClass: {
+                                    popup: 'popup-content',
+                                    confirmButton: 'secondary-button'
+                                }
                             });
                         }
                     });

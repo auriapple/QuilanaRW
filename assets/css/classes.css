@@ -140,6 +140,7 @@
 #confirm,
 #cancel {
     margin-top: 20px;
+    margin-bottom:0;
 }
 #delete-course-form .secondary-button,
 #delete-course-form .tertiary-button,
