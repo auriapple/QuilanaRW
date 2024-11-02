@@ -602,23 +602,22 @@ body {
 .quizzes-container,
 .exams-container,
 .assessment-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: start;
+    width: 100%;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(325px, 1fr));
 }
 
 /* Cards */
 .course-card,
 .class-card,
 .assessment-card {
-    width: 330px;
     height: 208px;
     background-color: #FFFFFF;
-    border: 1px solid #F8F9FA;
-    border-radius: 8px;
-    margin: 10px; 
-    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+    border: 1px solid #EEEEEE;
+    border-radius: 20px;
+    margin: 10px;
+    box-shadow: 4px 4px 4px rgba(150, 150, 150, 0.15);
     padding: 20px;
     box-sizing: border-box;
     position: relative;
@@ -847,6 +846,7 @@ body {
     text-align: center;
     font-style: italic;
     width: 100%;
+    grid-column: 1 / -1;
 }
 
 /* RESULTS - STUDENT */

@@ -211,8 +211,10 @@ if ($stmt = $conn->prepare($query)) {
                     SELECT * 
                     FROM rw_flashcard 
                     WHERE reviewer_id = ? 
-                     BY flashcard_id ASC
+                    ORDER BY flashcard_id ASC
                 ";
+
+                $card_number = 1;
 
                 if ($stmt = $conn->prepare($flashcards_query)) {
                     $stmt->bind_param("i", $reviewer_id);
@@ -227,6 +229,8 @@ if ($stmt = $conn->prepare($query)) {
                         
                         while ($row = $flashcards_result->fetch_assoc()) {
                             echo '<li class="list-group-item">';
+                            echo '<div class="question-number">Card ' . $card_number . ':</div>';
+                          
                             echo '<strong>Term:</strong> ' . htmlspecialchars($row['term']);
                             echo '<br><strong>Definition:</strong> ' . htmlspecialchars($row['definition']);
                             
@@ -235,6 +239,8 @@ if ($stmt = $conn->prepare($query)) {
                             echo '<button class="btn btn-sm btn-outline-danger remove_flashcard" data-id="' . htmlspecialchars($row['flashcard_id']) . '"><i class="fa fa-trash"></i></button>';
                             echo '</div>';
                             echo '</li>';
+
+                            $card_number++;
                         }
                         echo '</ul>';
                         echo '</div>';
