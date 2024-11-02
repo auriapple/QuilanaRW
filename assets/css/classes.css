@@ -154,13 +154,15 @@
 #delete-course-form .modal-footer,
 #delete-class-form .modal-footer,
 #delete-assessment-popup .modal-footer,
-#delete-reviewer-modal-content .modal-footer {
+#delete-reviewer-modal-content .modal-footer,
+#delete-shared-modal-content .modal-footer {
     gap: 20px;
 }
 #program-details-popup .modal-footer,
 #class-details-popup .modal-footer,
 #delete-reviewer-modal-content .modal-footer,
-#add-edit-reviewer-content .modal-footer {
+#add-edit-reviewer-content .modal-footer,
+#delete-shared-modal-content .modal-footer {
     border: none !important;
     padding: 0 !important;
     justify-content: center !important;

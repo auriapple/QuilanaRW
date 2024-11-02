@@ -77,7 +77,7 @@
 
         <div id="shared-code-popup" class="popup-overlay">
             <div id="shared-code-content" class="popup-content">
-                <button id="modal-close" class="popup-close">&times;</button>
+                <button id="shared-code-close" class="popup-close">&times;</button>
                 <h2 id="shared-code-title" class="popup-title">Enter Shared Code</h2>
 
                 <form id="code-frm" action="" method="POST">
@@ -93,15 +93,49 @@
             </div>
         </div>
 
+        <div id="delete-shared-popup" class="popup-overlay"> 
+            <div id="delete-shared-modal-content" class="popup-content" role="document">
+                <button class="popup-close close-popup">&times;</button>
+                <h2 id="delete-shared-title" class="popup-title">Delete Shared Reviewer</h2>
+
+                <!-- Form to delete the program-->
+                <form id='delete-shared-form'>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <p id="delete-message" class="popup-message"> Are you sure you want to delete this reviewer?</p>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="tertiary-button close-popup" id="shared-reviewer-close" type="button">Cancel</button>
+                        <button class="secondary-button" id="confirm_delete_btn" type="button">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <script>
             $(document).ready(function() {
+                // Handles Popups
+                function showPopup(popupId) {
+                    $('#' + popupId).css('display', 'flex');
+                }
+
+                function closePopup(popupId) {
+                    $('#' + popupId).css('display', 'none');
+                }
+
                 $('#enterCode').click(function() {
                     $('#shared-code-popup #code-frm')[0].reset();
-                    $('#shared-code-popup').css('display', 'flex');
+                    showPopup('shared-code-popup');
                 });
 
-                $('#modal-close').click(function() {
-                    $('#shared-code-popup').hide(); 
+                $('#shared-code-close').click(function() {
+                    closePopup('shared-code-popup');
+                });
+
+                $('.close-popup').click(function() {
+                    closePopup('delete-shared-popup');
                 });
 
                 $('#code-frm').submit(function(event) {
@@ -179,70 +213,64 @@
 
                 $(document).on('click', '.remove_reviewer', function(event) {
                     event.preventDefault();
-                    var sharedId = $(this).data('id'); 
+                    var sharedId = $(this).data('id');
+                    $('#confirm_delete_btn').data('id', sharedId);
+                    showPopup('delete-shared-popup');
+                });
 
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "You won't be able to revert this!",
-                        icon: 'warning',
-                        confirmButtonText: 'Yes, delete it!',
-                        showCancelButton: true,
-                        customClass: {
-                            popup: 'popup-content',
-                            confirmButton: 'secondary-button',
-                            cancelButton: 'secondary-button'
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            $.ajax({
-                                type: 'POST',
-                                url: 'remove_shared_reviewer.php',
-                                data: { shared_id: sharedId },
-                                dataType: 'json',
-                                success: function(response) {
-                                    if (response.status === 'success') {
-                                        $(`.course-card[data-id="${sharedId}"]`).remove();
-                                        Swal.fire({
-                                            title: 'Deleted!',
-                                            text: response.message,
-                                            icon: 'success',
-                                            confirmButtonText: 'OK',
-                                            customClass: {
-                                                popup: 'popup-content',
-                                                confirmButton: 'secondary-button',
-                                                cancelButton: 'secondary-button'
-                                            }
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                location.reload();
-                                            }     
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            title: 'Error!',
-                                            text: response.message,
-                                            icon: 'error',
-                                            confirmButtonText: 'OK',
-                                            customClass: {
-                                                popup: 'popup-content',
-                                                confirmButton: 'secondary-button',
-                                                cancelButton: 'secondary-button'
-                                            }
-                                        });
+                $('#confirm_delete_btn').click(function() {
+                    var sharedId = $(this).data('id');
+                    closePopup('delete-shared-popup');
+
+                    $.ajax({
+                        type: 'POST',
+                        url: 'remove_shared_reviewer.php',
+                        data: { shared_id: sharedId },
+                        dataType: 'json',
+                        success: function(response) {
+                        console.log(response);
+                            if (response.status === 'success') {
+                                $(`.course-card[data-id="${sharedId}"]`).remove();
+                                Swal.fire({
+                                    title: 'Deleted!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        popup: 'popup-content',
+                                        confirmButton: 'secondary-button',
+                                        cancelButton: 'secondary-button'
                                     }
-                                },
-                                error: function() {
-                                    Swal.fire({
-                                        title: 'Error!',
-                                        text: 'An error occurred while deleting the shared reviewer. Please try again.',
-                                        icon: 'error',
-                                        confirmButtonText: 'OK',
-                                        customClass: {
-                                            popup: 'popup-content',
-                                            confirmButton: 'secondary-button',
-                                            cancelButton: 'secondary-button'
-                                        }
-                                    });
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }     
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: response.message,
+                                    icon: 'error',
+                                    confirmButtonText: 'OK',
+                                    customClass: {
+                                        popup: 'popup-content',
+                                        confirmButton: 'secondary-button',
+                                        cancelButton: 'secondary-button'
+                                    }
+                                });
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX error:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'An error occurred while deleting the shared reviewer. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                customClass: {
+                                    popup: 'popup-content',
+                                    confirmButton: 'secondary-button',
+                                    cancelButton: 'secondary-button'
                                 }
                             });
                         }
