@@ -400,30 +400,59 @@
             $(document).on('click', '.share_reviewer', function() { 
                 var reviewerId = $(this).data('id'); 
 
-                $('#msg').html(''); // Clear any previous messages
-                $('#reviewer-code-popup #reviewer-code-title').html('Reviewer Code'); // Set modal title to 'Reviewer Code'
-
-                // Fetch the code dynamically using AJAX
+                // First, check if there are questions for the reviewer
                 $.ajax({
-                    url: 'reviewer_code.php', 
-                    type: 'POST', 
-                    data: { reviewer_id: reviewerId }, 
+                    url: 'check_reviewer.php',
+                    type: 'POST',
+                    data: { reviewerId: reviewerId },
+                    dataType: 'json',
                     success: function(response) {
-                        var result = JSON.parse(response); 
-                        if (result.success) {
-                            $('#modal_code').text(result.code); // Display the generated code
-                        } else {
-                            $('#modal_code').text('Error: ' + result.error); 
-                        }
-                        showPopup('reviewer-code-popup');
+                        if (response.success) {
+                            // If successful, fetch the reviewer code
+                            $('#msg').html(''); // Clear any previous messages
+                            $('#reviewer-code-popup #reviewer-code-title').html('Reviewer Code'); // Set modal title to 'Reviewer Code'
 
+                            $.ajax({
+                                url: 'reviewer_code.php', 
+                                type: 'POST', 
+                                data: { reviewer_id: reviewerId }, 
+                                success: function(response) {
+                                    var result = JSON.parse(response); 
+                                    if (result.success) {
+                                        $('#modal_code').text(result.code); // Display the generated code
+                                    } else {
+                                        $('#modal_code').text('Error: ' + result.error); 
+                                    }
+                                    showPopup('reviewer-code-popup');
+                                },
+                                error: function(xhr, status, error) {
+                                    $('#modal_code').text('Error fetching code. Please try again.'); 
+                                    console.error('Error:', error); 
+                                }
+                            });
+
+                        } else {
+                            // If there are no questions, display a message
+                            Swal.fire({
+                                title: 'No Questions!',
+                                text: 'Please add some questions first before sharing the reviewer',
+                                icon: 'info',
+                                confirmButtonText: 'OK',
+                                allowOutsideClick: false,
+                                customClass: {
+                                    popup: 'popup-content',
+                                    confirmButton: 'secondary-button'
+                                }
+                            });
+                        }
                     },
                     error: function(xhr, status, error) {
-                        $('#modal_code').text('Error fetching code. Please try again.'); 
+                        $('#modal_code').text('Error checking reviewer. Please try again.'); 
                         console.error('Error:', error); 
                     }
                 });
             });
+
 
             // Close the popup when close button is clicked
             $('.popup-close').on('click', function() {
