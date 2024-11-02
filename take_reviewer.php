@@ -65,8 +65,8 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
     <div id="results-popup" class="popup-overlay" style="display: none;">
         <div class="popup-content">
             <button class="popup-close" onclick="closePopup('results-popup')">&times;</button>
-            <h2 class="popup-title">Quiz Results</h2>
-            <div id="results-content">
+            <h2 class="popup-title result-title">Quiz Results</h2>
+            <div id="results-content" class="popup-message">
                 <!-- Results will be dynamically put here -->
             </div>
             <div class="popup-buttons">
@@ -76,21 +76,23 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
     </div>
 
     <div class="content-wrapper">
-    <div class="back-arrow">
-        <a href="reviewer.php?class_id=<?php echo htmlspecialchars($_GET['reviewer_id']); ?>&show_modal=true">
-            <i class="fa fa-arrow-left"></i>
-        </a>
-    </div>
-
     <div class="reviewer-container">
-        <h2><strong><?php echo $reviewer_name; ?></strong></h2>
-        <p><strong>Topic:</strong> <?php echo $topic; ?></p>
-
         <?php if ($reviewer_type == 1): // Quiz ?>
             <form id="quiz-form" action="submit_quiz.php" method="POST">
-                <div class="header">
+                <div class="header-container">
+                    <a href="reviewer.php?class_id=<?php echo htmlspecialchars($_GET['reviewer_id']); ?>&show_modal=true">
+                        <i class="fa fa-arrow-left"></i>
+                    </a>
                     <button type="button" onclick="showPopup('confirmation-popup')" id="submit" class="secondary-button">Submit</button>
                 </div>
+
+                <!-- Reviewer name and topic -->
+                <div class="tabs-container">
+                    <ul class="tabs">
+                        <li class="tab-link active" data-tab="reviewer-tab"><?php echo $reviewer_name . ' | ' . $topic; ?></li>
+                    </ul>
+                </div>
+
                 <div class="questions-container">
                     <?php
                     $question_number = 1;
@@ -148,6 +150,19 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
                 <input type="hidden" name="reviewer_id" value="<?php echo $reviewer_id; ?>">
             </form>
         <?php else: // Flashcards ?>
+            <div class="header-container">
+                <a href="reviewer.php?class_id=<?php echo htmlspecialchars($_GET['reviewer_id']); ?>&show_modal=true">
+                    <i class="fa fa-arrow-left"></i>
+                </a>
+            </div>
+
+            <!-- Reviewer name and topic -->
+            <div class="tabs-container">
+                <ul class="tabs">
+                    <li class="tab-link active" data-tab="reviewer-tab"><?php echo $reviewer_name . ' | ' . $topic; ?></li>
+                </ul>
+            </div>
+
             <div id="flashcard-container">
                 <!-- Flashcards will be loaded here -->
             </div>
@@ -222,7 +237,7 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
         }
     }
 
-         function displayFlashcards(flashcards) {
+    function displayFlashcards(flashcards) {
         let html = '';
         flashcards.forEach((flashcard, index) => {
             html += `
@@ -264,8 +279,8 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
             .then(response => response.json())
             .then(data => {
                 document.getElementById('results-content').innerHTML = `
-                    <p>Your score: ${data.score} out of ${data.total}</p>
-                    <p>${data.message}</p>
+                    <p class="score">Your score: ${data.score} out of ${data.total}</p>
+                    <p class="message">${data.message}</p>
                 `;
                 closePopup('confirmation-popup');
                 showPopup('results-popup');

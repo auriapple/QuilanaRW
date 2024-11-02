@@ -1,31 +1,14 @@
-.back-arrow {
+.header-container {
+    justify-content: space-between !important;
+}
+.header-container a {
     font-size: 24px; 
     margin: 10px 0 15px 20px;
-}
-.back-arrow a {
     color: #4A4CA6; 
     text-decoration: none;
 }
-.back-arrow a:hover {
+.header-container a:hover {
     color: #0056b3; 
-}
-.reviewer-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-    margin-right: 26px;
-    min-height: 80vh;
-}
-.header{
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    position: relative;
-    margin-top: -50px;
-    margin-right: 10px;
-    z-index: 1000;
 }
 
 .flashcard {
@@ -35,17 +18,24 @@
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    min-height: 50vh;
+    min-height: 55vh;
 }
 .flashcard .front, .flashcard .back {
     display: flex;           
     justify-content: center;  
     align-items: center;      
-    height: 40%;            
+    height: 55vh;            
     padding: 20px;
     text-align: center;
 }
-
+.flashcard .front {
+    background-color: #221949;
+    color: white;
+}
+.flashcard .back {
+    background-color: #cdf8ff;
+    color: #1E1A43;
+}
 .front p, .back p {
     font-size: 30px;         
 }
@@ -72,10 +62,7 @@
     font-size: 16px;
     font-weight: bold;
 }
-.secondary-button {
-    margin-top: -15px; 
-    margin-bottom: 15px;
-}
+
 /*** BASE POPUP STYLES ***/
 .popup-content {
     display: flex;
@@ -86,15 +73,31 @@
     justify-content: center;
     align-items: center;
 }
+.result-title {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+.score {
+    font-size: 22px;
+    margin-bottom: 0;
+    font-weight: bold;
+}
+.message {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
 #confirm,
 #cancel,
 #result,
 #result-2,
 #submit-answers,
-#error {
+#error
+#submit {
     font-size: 14px;
     outline: none;
 }
+
+
 @media screen and (max-width: 500px) {
   
     #confirmation-popup .popup-content,
