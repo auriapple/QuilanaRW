@@ -49,7 +49,7 @@
                                         <div class="arrow-up"></div>
                                         <a href="#" class="edit_reviewer" data-id="<?php echo $reviewer_id ?>"><span class="material-symbols-outlined">Edit</span>Edit</a>
                                         <a href="#" class="remove_reviewer" data-id="<?php echo $reviewer_id ?>"><span class="material-symbols-outlined">delete</span>Delete</a>
-                                        <a href="#" class="share_reviewer" data-id="<?php echo $reviewer_id ?>"><span class="material-symbols-outlined">key</span>Get Code</a>
+                                        <a href="#" class="share_reviewer" data-id="<?php echo $reviewer_id ?>" data-type="<?php echo $row['reviewer_type']; ?>" ><span class="material-symbols-outlined">key</span>Get Code</a>
                                     </div>
                                 </div>
                                 <div class="course-card-title"><?php echo $row['reviewer_name'] ?></div>
@@ -215,11 +215,15 @@
 
             $('.take-reviewer').click(function() {
                 var reviewerId = $(this).data('id');
+                var reviewerType = $(this).data('type');
 
                 $.ajax({
                     url: 'check_reviewer.php',
                     type: 'POST',
-                    data: { reviewerId: reviewerId},
+                    data: { 
+                        reviewerId: reviewerId,
+                        reviewerType: reviewerType
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
@@ -399,12 +403,16 @@
 
             $(document).on('click', '.share_reviewer', function() { 
                 var reviewerId = $(this).data('id'); 
+                var reviewerType = $(this).data('type');
 
                 // First, check if there are questions for the reviewer
                 $.ajax({
                     url: 'check_reviewer.php',
                     type: 'POST',
-                    data: { reviewerId: reviewerId },
+                    data: { 
+                        reviewerId: reviewerId,
+                        reviewerType: reviewerType
+                    },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
