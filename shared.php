@@ -15,7 +15,7 @@
     <?php include('nav_bar.php'); ?>
     <div class="content-wrapper">
         <div class="join-class-container">
-            <button class="secondary-button" id="joinClass">Enter Code</button>
+            <button class="secondary-button" id="enterCode">Enter Code</button>
             <form class="search-bar" action="#" method="GET">
                 <input type="text" name="query" placeholder="Search" required>
                 <button type="submit"><i class="fa fa-search"></i></button>
@@ -43,12 +43,16 @@
                                     <button class="meatball-menu-btn">
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
-                                    <div class="meatball-menu">                                    
-                                        <a href="#" class="remove_reviewer" data-id="<?php echo $reviewer_id ?>">Remove</a>
+                                    <div class="meatball-menu">
+                                        <div class="arrow-up"></div>                                
+                                        <a href="#" class="remove_reviewer" data-id="<?php echo $reviewer_id ?>"><span class="material-symbols-outlined">delete</span>Delete</a>
                                     </div>
                                 </div>
                                 <div class="course-card-title"><?php echo $row['reviewer_name'] ?></div>
-                                <div class="course-card-text">Topic: <br><?php echo $row['topic'] ?></div>
+                                <div class="course-card-text">
+                                    Topic: <?php echo $row['topic'] ?><br>
+                                    Type: <?php echo $row['reviewer_type'] == 1 ? 'Test Reviewer' : 'Flashcard Reviewer'  ?>
+                                </div>
                                 <div class="course-actions">                
                                     <button class="main-button" 
                                         id="take_reviewer" 
@@ -71,14 +75,14 @@
             </div>
         </div>
 
-        <div id="join-class-popup" class="popup-overlay">
-            <div id="join-modal-content" class="popup-content">
-                <span id="modal-close" class="popup-close">&times;</span>
-                <h2 id="join-class-title" class="popup-title">Enter Shared Code</h2>
+        <div id="shared-code-popup" class="popup-overlay">
+            <div id="shared-code-content" class="popup-content">
+                <button id="modal-close" class="popup-close">&times;</button>
+                <h2 id="shared-code-title" class="popup-title">Enter Shared Code</h2>
 
                 <form id="code-frm" action="" method="POST">
                     <div class="modal-body">
-                        <div class="class-code">
+                        <div class="shared-code">
                             <input type="text" name="get_code" required class="code" placeholder="Reviewer Code" />
                         </div>
                     </div>
@@ -89,23 +93,15 @@
             </div>
         </div>
 
-        <div id="message-popup" class="popup-overlay" style="display: none;">
-            <div id="message-modal-content" class="popup-content">
-                <span id="message-modal-close" class="popup-close">&times;</span>
-                <h2 id="message-popup-title" class="popup-title">Message</h2>
-                <div id="message-body" class="modal-body"></div>
-            </div>
-        </div>
-
         <script>
             $(document).ready(function() {
-                $('#joinClass').click(function() {
-                    $('#join-class-popup #code-frm')[0].reset();
-                    $('#join-class-popup').css('display', 'flex');
+                $('#enterCode').click(function() {
+                    $('#shared-code-popup #code-frm')[0].reset();
+                    $('#shared-code-popup').css('display', 'flex');
                 });
 
                 $('#modal-close').click(function() {
-                    $('#join-class-popup').hide(); 
+                    $('#shared-code-popup').hide(); 
                 });
 
                 $('#code-frm').submit(function(event) {
@@ -116,36 +112,9 @@
                         data: $(this).serialize(),
                         dataType: 'json',
                         success: function(response) {
-                            $('#join-class-popup').hide(); 
+                            $('#shared-code-popup').hide(); 
 
                             if (response.status === 'success') {
-                               
-                                $('#reviewersList').append(`
-                                    <div class="course-card" data-id="${response.reviewer_id}">
-                                        <div class="course-card-body">
-                                            <div class="meatball-menu-container">
-                                                <button class="meatball-menu-btn">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </button>
-                                                <div class="meatball-menu">                                    
-                                                    <a href="#" class="remove_reviewer" data-id="${response.reviewer_id}">Remove</a>
-                                                </div>
-                                            </div>
-                                            <div class="course-card-title">${response.reviewer_name}</div>
-                                            <div class="course-card-text">Topic: <br>${response.topic}</div>
-                                            <div class="course-actions">                
-                                                <button class="main-button" 
-                                                    id="take_reviewer" 
-                                                    data-id="${response.reviewer_id}" 
-                                                    data-type="${response.reviewer_type}" 
-                                                    type="button" 
-                                                    onclick="window.location.href='take_shared_reviewer.php?reviewer_id=${response.reviewer_id}&reviewer_type=${response.reviewer_type}'">
-                                                    Take Reviewer
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `);
                                 Swal.fire({
                                     title: 'Success!',
                                     text: response.message,
@@ -155,6 +124,10 @@
                                     customClass: {
                                         popup: 'popup-content',
                                         confirmButton: 'secondary-button'
+                                    }
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
                                     }
                                 });
                             } else {
@@ -212,8 +185,13 @@
                         title: 'Are you sure?',
                         text: "You won't be able to revert this!",
                         icon: 'warning',
+                        confirmButtonText: 'Yes, delete it!',
                         showCancelButton: true,
-                        confirmButtonText: 'Yes, delete it!'
+                        customClass: {
+                            popup: 'popup-content',
+                            confirmButton: 'secondary-button',
+                            cancelButton: 'secondary-button'
+                        }
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $.ajax({
@@ -228,14 +206,28 @@
                                             title: 'Deleted!',
                                             text: response.message,
                                             icon: 'success',
-                                            confirmButtonText: 'OK'
+                                            confirmButtonText: 'OK',
+                                            customClass: {
+                                                popup: 'popup-content',
+                                                confirmButton: 'secondary-button',
+                                                cancelButton: 'secondary-button'
+                                            }
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                location.reload();
+                                            }     
                                         });
                                     } else {
                                         Swal.fire({
                                             title: 'Error!',
                                             text: response.message,
                                             icon: 'error',
-                                            confirmButtonText: 'OK'
+                                            confirmButtonText: 'OK',
+                                            customClass: {
+                                                popup: 'popup-content',
+                                                confirmButton: 'secondary-button',
+                                                cancelButton: 'secondary-button'
+                                            }
                                         });
                                     }
                                 },
@@ -244,7 +236,12 @@
                                         title: 'Error!',
                                         text: 'An error occurred while deleting the shared reviewer. Please try again.',
                                         icon: 'error',
-                                        confirmButtonText: 'OK'
+                                        confirmButtonText: 'OK',
+                                        customClass: {
+                                            popup: 'popup-content',
+                                            confirmButton: 'secondary-button',
+                                            cancelButton: 'secondary-button'
+                                        }
                                     });
                                 }
                             });

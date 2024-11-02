@@ -56,7 +56,8 @@
     z-index: 999;
 }
 
-.class-card .meatball-menu {
+.class-card .meatball-menu,
+.course-card .meatball-menu {
     width: 150px;
 }
 
