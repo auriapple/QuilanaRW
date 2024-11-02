@@ -34,7 +34,7 @@
         <div id="courses-tab" class="tab-content active">
             <div class="course-container">
                 <?php
-                $qry = $conn->query("SELECT * FROM rw_reviewer WHERE student_id = '".$_SESSION['login_id']."' ORDER BY topic ASC");
+                $qry = $conn->query("SELECT * FROM rw_reviewer WHERE student_id = '".$_SESSION['login_id']."' ORDER BY reviewer_name ASC");
                 if ($qry->num_rows > 0) {
                     while ($row = $qry->fetch_assoc()) {
                         $reviewer_id =  $row['reviewer_id'];
@@ -60,12 +60,11 @@
                                 <div class="course-actions">
                                     <a class="tertiary-button" id="view_reviewer_details" 
                                     href="manage_reviewer.php?reviewer_id=<?php echo $reviewer_id ?>" type="button"> Manage</a>                                
-                                    <button class="main-button" 
+                                    <button class="main-button take-reviewer" 
                                         id="take_reviewer" 
                                         data-id="<?php echo $row['reviewer_id']; ?>" 
                                         data-type="<?php echo $row['reviewer_type']; ?>" 
-                                        type="button" 
-                                        onclick="window.location.href='take_reviewer.php?reviewer_id=<?php echo $row['reviewer_id']; ?>&reviewer_type=<?php echo $row['reviewer_type']; ?>'">
+                                        type="button">
                                         Take Reviewer
                                     </button>
                                 </div>
@@ -212,6 +211,46 @@
             $(document).on('click', '.edit_reviewer', function() {
                 var reviewerId = $(this).data('id');
                 openReviewerModal('edit', reviewerId);
+            });
+
+            $('.take-reviewer').click(function() {
+                var reviewerId = $(this).data('id');
+
+                $.ajax({
+                    url: 'check_reviewer.php',
+                    type: 'POST',
+                    data: { reviewerId: reviewerId},
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = 'take_reviewer.php?reviewer_id=' + reviewerId;
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: response.message,
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                allowOutsideClick: false,
+                                customClass: {
+                                    popup: 'popup-content',
+                                    confirmButton: 'secondary-button'
+                                }
+                            });
+                        }
+                    }, error: function() {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Error fetching reviewer details.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            allowOutsideClick: false,
+                            customClass: {
+                                popup: 'popup-content',
+                                confirmButton: 'secondary-button'
+                            }
+                        });
+                    }
+                })
             });
 
             // Form submission handler
