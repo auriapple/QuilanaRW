@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Landing Page With Light/Dark Mode</title>
+    <title>Quilana Review Website | Welcome</title>
     <link rel="stylesheet" href="assets/css/landingpage.css" />
   </head>
   <body>
@@ -24,7 +24,6 @@
                 <li><a href="#">About</a></li>
                 <li><a href="#">Contact</a></li>
                 <li><a href="#">Privacy</a></li>
-                <li><a href="register.php" class="btn">Sign up</a></li>
               </ul>
             </div>
 
@@ -40,8 +39,10 @@
           <div class="container">
             <div class="left">
               <div class="big-title">
-                <h1>Streamline Your,</h1>
-                <h1>Exam Administration with Quilana.</h1>
+                <h1><span class="quilana">QUILANA</span>: Where Tradition</h1>
+                <h1>Meets Technology For</h1>
+                <h1>Streamlined Assessment</h1>
+                <h1>Administration!</h1>
               </div>
               <p class="text">
                 Combining the best of traditional and online exam systems for efficient and secure assessments
@@ -52,7 +53,7 @@
             </div>
 
             <div class="right">
-              <img src="image/lana.png" alt="Person Image" class="person" />
+              <img src="image/lana.png" alt="Lana" class="person" />
             </div>
           </div>
         </div>
@@ -60,8 +61,8 @@
         <div class="bottom-area">
           <div class="container">
             <button class="toggle-btn">
-              <i class="far fa-moon"></i>
-              <i class="far fa-sun"></i>
+              <i class="fas fa-moon"></i>
+              <i class="fas fa-sun fa-lg"></i>
             </button>
           </div>
         </div>

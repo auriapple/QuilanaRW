@@ -8,6 +8,8 @@
   --darkTwo: #45424b;
   --lightOne: #919191;
   --lightTwo: #aaa;
+  --quilanaColor: #7F81C5;
+  --quilanaOutline: #312f3a;
 }
 
 .dark {
@@ -18,6 +20,8 @@
   --darkTwo: #fff;
   --lightOne: #ccc;
   --lightTwo: #e7e3e3;
+  --quilanaColor: #7F81C5;
+  --quilanaOutline: white;
 }
 
 *,
@@ -84,19 +88,17 @@ header .container {
 .logo {
   display: flex;
   align-items: center;
-  cursor: pointer;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .logo img {
   width: 40px;
-  margin-right: 0.6rem;
-  margin-top: -0.6rem;
 }
 
 .logo h3 {
   color: var(--darkTwo);
   font-size: 1.55rem;
-  line-height: 1.2;
   font-weight: 700;
 }
 
@@ -195,8 +197,16 @@ header .container {
 .big-title {
   font-size: 1.4rem;
   color: var(--darkOne);
-  text-transform: capitalize;
   line-height: 1.4;
+}
+
+.quilana {
+  color: var(--quilanaColor);
+  text-shadow: 
+      -1px -1px 0 var(--quilanaOutline),
+      1px -1px 0 var(--quilanaOutline),
+      -1px 1px 0 var(--quilanaOutline),
+      1px 1px 0 var(--quilanaOutline);
 }
 
 .text {
@@ -336,6 +346,11 @@ header .container {
   .big-wrapper.active .overlay {
     pointer-events: all;
     opacity: 1;
+  }
+
+  .big-wrapper.active .hamburger-menu .bar::before,
+  .big-wrapper.active .hamburger-menu .bar::after {
+    background-color: white;
   }
 
   .showcase-area {
