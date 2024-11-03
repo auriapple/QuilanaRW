@@ -340,25 +340,37 @@
 
             // Delete button functionality for reviewers
             $(document).on('click', '.remove_reviewer', function() {
-                var reviewerId = $(this).data('id'); // Get the reviewer ID from the clicked element
-                $('#confirm_delete_btn').data('id', reviewerId); // Set reviewer ID on the confirm button
-                showPopup('delete-reviewer-popup');
+            var reviewerId = $(this).data('id');
+            $('#confirm_delete_btn').data('id', reviewerId);
+            showPopup('delete-reviewer-popup');
             });
 
+            // Confirm delete button click handler
             $('#confirm_delete_btn').click(function() {
                 var reviewerId = $(this).data('id');
                 closePopup('delete-reviewer-popup');
+                
+                // Show loading state
+                Swal.fire({
+                    title: 'Deleting...',
+                    text: 'Please wait while we delete the reviewer',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
                 $.ajax({
-                    url: 'delete_reviewer.php', 
-                    method: 'POST', 
-                    data: { reviewer_id: reviewerId }, 
+                    url: 'delete_reviewer.php',
+                    method: 'POST',
+                    data: { reviewer_id: reviewerId },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
                             Swal.fire({
                                 title: 'Success!',
-                                text: 'Reviewer deleted successfully!',
+                                text: response.message || 'Reviewer deleted successfully!',
                                 icon: 'success',
                                 confirmButtonText: 'OK',
                                 allowOutsideClick: false,
@@ -374,7 +386,7 @@
                         } else {
                             Swal.fire({
                                 title: 'Error!',
-                                text: 'Unable to delete reviewer: ' + response.message,
+                                text: response.message || 'Unable to delete reviewer',
                                 icon: 'error',
                                 confirmButtonText: 'OK',
                                 allowOutsideClick: false,
@@ -388,7 +400,7 @@
                     error: function(xhr, status, error) {
                         Swal.fire({
                             title: 'Error!',
-                            text: 'An error occurred while deleting the reviewer. Please try again.',
+                            text: 'An error occurred while deleting the reviewer: ' + error,
                             icon: 'error',
                             confirmButtonText: 'OK',
                             allowOutsideClick: false,
