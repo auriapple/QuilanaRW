@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quilana Review Website | Welcome</title>
+    <title>Quilana Review Website</title>
     <link rel="stylesheet" href="assets/css/landingpage.css" />
   </head>
   <body>
@@ -16,7 +16,7 @@
           <div class="container">
             <div class="logo">
               <img src="image/lana.png" alt="Logo" />
-              <h3>Quilana</h3>
+              <h3>Quilana </h3>
             </div>
 
             <div class="links">
@@ -39,15 +39,11 @@
           <div class="container">
             <div class="left">
               <div class="big-title">
-                <h1><span class="quilana">QUILANA</span>: Where Tradition</h1>
-                <h1>Meets Technology For</h1>
-                <h1>Streamlined Assessment</h1>
-                <h1>Administration!</h1>
+                <h1>Empowering minds</h1>
+                <h1>One Quiz at a Time</h1>
               </div>
               <p class="text">
-                Combining the best of traditional and online exam systems for efficient and secure assessments
-              </p>
-              <div class="cta">
+              Bringing innovation to review sessions, supporting students in achieving their best through engaging study tools.              <div class="cta">
                 <a href="login.php" class="btn">Get started</a>
               </div>
             </div>
