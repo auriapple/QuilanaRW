@@ -149,7 +149,7 @@ if (!isset($_SESSION['login_user_type'])) {
                             echo "</div>";
                         }
                     } else {
-                        echo "<p class='no-assessments'>No recent quiz reviewers.</p>";
+                        echo "<p class='no-assessments'>No recent test reviewers taken</p>";
                     }
                     ?>
                 </div>

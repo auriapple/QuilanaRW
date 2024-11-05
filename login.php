@@ -36,14 +36,14 @@
 
                             <!-- Username Input -->
                             <div class="input-wrap">
-                                <input type="text" name="username" class="input-field" autocomplete="off" required />
+                                <input type="text" id="username" name="username" class="input-field" autocomplete="off" required />
                                 <label for="username">Username</label>
                             </div>
 
                             <!-- Password Input -->
                             <div class="input-wrap">
-                                <input type="password" name="password" class="input-field" autocomplete="off" required />
-                                <label>Password</label>
+                                <input type="password" id="password" name="password" class="input-field" autocomplete="off" required />
+                                <label for="password">Password</label>
                             </div>
 
                             <input type="submit" value="Sign In" class="sign-btn" />
