@@ -76,21 +76,23 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
     </div>
 
     <div class="content-wrapper">
-    <div class="back-arrow">
-        <a href="shared.php?class_id=<?php echo htmlspecialchars($_GET['reviewer_id']); ?>&show_modal=true">
-            <i class="fa fa-arrow-left"></i>
-        </a>
-    </div>
-
     <div class="reviewer-container">
-        <h2><strong><?php echo $reviewer_name; ?></strong></h2>
-        <p><strong>Topic:</strong> <?php echo $topic; ?></p>
-
         <?php if ($reviewer_type == 1): // Quiz ?>
             <form id="quiz-form" action="submit_quiz.php" method="POST">
-                <div class="header">
+                <div class="header-container">
+                    <a href="shared.php?class_id=<?php echo htmlspecialchars($_GET['reviewer_id']); ?>&show_modal=true">
+                        <i class="fa fa-arrow-left"></i>
+                    </a>
                     <button type="button" onclick="showPopup('confirmation-popup')" id="submit" class="secondary-button">Submit</button>
                 </div>
+
+                <!-- Reviewer name and topic -->
+                <div class="tabs-container">
+                    <ul class="tabs">
+                        <li class="tab-link active" data-tab="reviewer-tab"><?php echo $reviewer_name . ' | ' . $topic; ?></li>
+                    </ul>
+                </div>
+
                 <div class="questions-container">
                     <?php
                     $question_number = 1;
