@@ -275,6 +275,117 @@ td .btns,
     padding: 5px 25px;
 }
 
+/* Dashboard To-Do List */
+.dashboard-todo {
+    grid-column: 2 / 3;
+    grid-row: 3 / 4;
+    border-radius: 20px;
+    border: 1px solid #EEEEEE;
+    box-sizing: border-box;
+    margin: 10px;
+    padding: 20px;
+    box-shadow: 4px 4px 4px rgba(150, 150, 150, 0.15);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.todo-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e1a43;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.todo-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.todo-input-container input {
+    width: 200px;
+    height: 40px;
+    border: 1px solid #EEEEEE;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-size: 16px;
+}
+
+.todo-input-container button {
+    width: 90px;
+    height: 40px;
+    border-radius: 8px;
+    border: none;
+    background-color: #87ffb0;
+    color: #2f8113;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.todo-input-container button:hover {
+    background-color: #62d08f;
+}
+
+.todo-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    max-height: 200px; 
+}
+
+.todo-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: fit-content;
+    width: 100%;
+    min-width: fit-content;
+    border-radius: 10px;
+    border: 1px solid rgb(228, 228, 228);
+    box-sizing: border-box;
+    padding: 10px 15px;
+    margin-top: 15px;
+}
+
+.todo-list li label {
+    margin-bottom: 0px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+.todo-list li .btns {
+    display: flex;
+    min-width: fit-content;
+    height: fit-content;
+    gap: 10px;
+}
+
+.todo-list li .btns .delete {
+    width: 35px; 
+    height: 35px;
+    border-radius: 50%; 
+    border: none;
+    margin-left: 10px;
+    background-color: #ff8585;
+    color: #e00f0f;
+    font-size: 16px; 
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.todo-list li .btns .delete:hover {
+    background-color: #e26565;
+}
+
+
 @media screen and (max-width: 850px) {
     .dashboard-container {
         display: flex;

@@ -17,6 +17,7 @@ if (!isset($_SESSION['login_user_type'])) {
         <title>Dashboard | Quilana</title>
         <link rel="stylesheet" href="assets/css/faculty-dashboard.css">
         <link rel="stylesheet" href="assets/css/calendar.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
         <script src="assets/js/calendar.js" defer></script>
     </head>
@@ -181,6 +182,88 @@ if (!isset($_SESSION['login_user_type'])) {
                     </div>
                 </div>
             </div>
+
+            <!-- To Do List -->
+            <div class="dashboard-todo">
+                    <div class="todo-header">
+                        <h1>To-Do List</h1>
+                    </div>
+                    <div class="todo-input-container">
+                        <input type="text" placeholder="Add a new task" id="todo-input">
+                        <button id="todo-add-btn">Add</button>
+                    </div>
+                    <ul class="todo-list" id="todo-list">
+                        <!-- Todo items will be added here dynamically -->
+                    </ul>
+            </div>
+
         </div>
     </body>
 </html>
+<script>
+const todoInput = document.getElementById('todo-input');
+const todoAddBtn = document.getElementById('todo-add-btn');
+const todoList = document.getElementById('todo-list');
+
+// Load todos from localStorage
+loadTodos();
+
+// Add todo on button click or Enter key press
+todoAddBtn.addEventListener('click', addTodo);
+todoInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        addTodo();
+    }
+});
+
+function addTodo() {
+    const todoText = todoInput.value.trim();
+    if (todoText !== '') {
+        createTodoItem(todoText);
+        todoInput.value = '';
+        saveTodos();
+    }
+}
+
+function createTodoItem(text) {
+    const todoItem = document.createElement('li');
+    const todoLabel = document.createElement('label');
+    const todoButtons = document.createElement('div');
+    const deleteBtn = document.createElement('button');
+
+    todoLabel.textContent = text;
+    deleteBtn.classList.add('delete');
+
+    const trashIcon = document.createElement('i');
+    trashIcon.classList.add('fas', 'fa-trash-alt');
+    deleteBtn.appendChild(trashIcon);
+
+    deleteBtn.addEventListener('click', () => {
+        deleteTodo(todoItem);
+    });
+
+    todoButtons.classList.add('btns');
+    todoButtons.appendChild(deleteBtn);
+
+    todoItem.appendChild(todoLabel);
+    todoItem.appendChild(todoButtons);
+    todoList.appendChild(todoItem);
+}
+
+function deleteTodo(item) {
+    todoList.removeChild(item);
+    saveTodos();
+}
+
+function saveTodos() {
+    const todos = Array.from(todoList.children).map(item => item.firstChild.textContent);
+    localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+function loadTodos() {
+    const todos = JSON.parse(localStorage.getItem('todos')) || [];
+    todos.forEach(todo => {
+        createTodoItem(todo);
+    });
+}
+</script>
