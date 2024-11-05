@@ -109,8 +109,8 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
                             $choices_query = $conn->query("SELECT * FROM rw_question_opt WHERE rw_question_id = '" . $question['rw_question_id'] . "'");
                             while ($choice = $choices_query->fetch_assoc()) {
                                 echo "<div class='form-check'>";
-                                echo "<input class='form-check-input' type='radio' name='answers[" . $question['rw_question_id'] . "]' value='" . htmlspecialchars($choice['option_text']) . "' required>";
-                                echo "<label class='form-check-label'>" . htmlspecialchars($choice['option_text']) . "</label>";
+                                echo "<input id='option_" . htmlspecialchars($choice['rw_option_id']) . "' class='form-check-input' type='radio' name='answers[" . $question['rw_question_id'] . "]' value='" . htmlspecialchars($choice['option_text']) . "' required>";
+                                echo "<label for='option_" . htmlspecialchars($choice['rw_option_id']) . "' class='form-check-label'>" . htmlspecialchars($choice['option_text']) . "</label>";
                                 echo "</div>";
                             }
                         // Multiple choice (checkboxes)
@@ -120,8 +120,8 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
                             $choices_query = $conn->query("SELECT * FROM rw_question_opt WHERE rw_question_id = '" . $question['rw_question_id'] . "'");
                             while ($choice = $choices_query->fetch_assoc()) {
                                 echo "<div class='form-check'>";
-                                echo "<input class='form-check-input' type='checkbox' name='answers[" . $question['rw_question_id'] . "][]' value='" . htmlspecialchars($choice['option_text']) . "'>";
-                                echo "<label class='form-check-label'>" . htmlspecialchars($choice['option_text']) . "</label>";
+                                echo "<input id='option_" . htmlspecialchars($choice['rw_option_id']) . "' class='form-check-input' type='checkbox' name='answers[" . $question['rw_question_id'] . "][]' value='" . htmlspecialchars($choice['option_text']) . "'>";
+                                echo "<label for='option_" . htmlspecialchars($choice['rw_option_id']) . "' class='form-check-label'>" . htmlspecialchars($choice['option_text']) . "</label>";
                                 echo "</div>";
                             }
                         // True/False (radio buttons)
@@ -129,17 +129,17 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
                             echo "<input type='hidden' name='answers[" . $question['rw_question_id'] . "]' value=''>";
                             
                             echo "<div class='form-check'>";
-                            echo "<input class='form-check-input' type='radio' name='answers[" . $question['rw_question_id'] . "]' value='true' required>";
-                            echo "<label class='form-check-label'>True</label>";
+                            echo "<input id='true_" . htmlspecialchars($question['rw_question_id']) . "' class='form-check-input' type='radio' name='answers[" . $question['rw_question_id'] . "]' value='true' required>";
+                            echo "<label for='true_" . htmlspecialchars($question['rw_question_id']) . "' class='form-check-label'>True</label>";
                             echo "</div>";
                             echo "<div class='form-check'>";
-                            echo "<input class='form-check-input' type='radio' name='answers[" . $question['rw_question_id'] . "]' value='false' required>";
-                            echo "<label class='form-check-label'>False</label>";
+                            echo "<input id='false_" . htmlspecialchars($question['rw_question_id']) . "' class='form-check-input' type='radio' name='answers[" . $question['rw_question_id'] . "]' value='false' required>";
+                            echo "<label for='false_" . htmlspecialchars($question['rw_question_id']) . "' class='form-check-label'>False</label>";
                             echo "</div>";
                         // Fill in the blank and identification (text input)
                         } elseif ($question_type == 4 || $question_type == 5) {
                             echo "<div class='form-check-group'>";
-                            echo "<input type='text' class='form-control' name='answers[" . $question['rw_question_id'] . "]' placeholder='Type your answer here' required>";
+                            echo "<input type='text' id='answer_" . htmlspecialchars($question['rw_question_id']) . "' class='form-control' name='answers[" . $question['rw_question_id'] . "]' placeholder='Type your answer here' required>";
                             echo "</div>";
                         }
                         echo "</div>";

@@ -84,13 +84,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
     
             case 'true_false':
-                $tf_answer = $_POST['tf_answer'] ?? '';
-                $is_correct = ($tf_answer === 'true') ? 1 : 0;
+                $correct_option = $_POST['tf_answer'] ?? '';
+                $options = ['true', 'false'];
 
-                $options_query = "INSERT INTO rw_question_opt (option_text, is_right, rw_question_id) VALUES (?, ?, ?)";
-                $option_stmt = $conn->prepare($options_query);
-                $option_stmt->bind_param("sii", $tf_answer, $is_correct, $question_id);
-                $option_stmt->execute();
+                foreach($options as $option) {
+                    $is_correct = ($option === $correct_option) ? 1 : 0;
+
+                    $options_query = "INSERT INTO rw_question_opt (option_text, is_right, rw_question_id) VALUES (?, ?, ?)";
+                    $option_stmt = $conn->prepare($options_query);
+                    $option_stmt->bind_param("sii", $option, $is_correct, $question_id);
+                    $option_stmt->execute();    
+                }
                 break;
 
             case 'identification':
