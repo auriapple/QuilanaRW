@@ -8,6 +8,18 @@ if (!isset($_SESSION['login_user_type'])) {
     exit();
 }
 
+// Fetch scheduled to-do
+$today = date('Y-m-d');
+$todo_query = $conn->query("
+    SELECT todo_date
+    FROM rw_student_todo
+    WHERE todo_date >= '$today' AND student_id = '" . $_SESSION['login_id'] . "'
+");
+$schedules = [];
+while ($row = $todo_query->fetch_assoc()) {
+    $schedules[] = $row['todo_date'];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -185,85 +197,131 @@ if (!isset($_SESSION['login_user_type'])) {
 
             <!-- To Do List -->
             <div class="dashboard-todo">
-                    <div class="todo-header">
-                        <h1>To-Do List</h1>
-                    </div>
-                    <div class="todo-input-container">
-                        <input type="text" placeholder="Add a new task" id="todo-input">
-                        <button class="secondary-button" id="todo-add-btn">Add</button>
-                    </div>
-                    <ul class="todo-list" id="todo-list">
-                        <!-- Todo items will be added here dynamically -->
-                    </ul>
+                <div class="todo-header">
+                    <h1>To-Do List</h1>
+                </div>
+                <div class="todo-input-container">
+                    <input type="text" placeholder="Add a new task" id="todo-input">
+                    <button class="secondary-button" id="todo-add-btn"><i class="fas fa-add"></i> Add</button>
+                </div>
+                <div class="todo-list" id="todo-list">
+                    <?php 
+                    // Fetch all scheduled to-do tasks
+                    $todo_tasks_query = $conn->query("
+                        SELECT todo_id, todo_text, todo_date
+                        FROM rw_student_todo
+                        WHERE student_id = '" . $_SESSION['login_id'] . "' AND todo_date >= '$today'
+                        ORDER BY todo_date ASC
+                    ");
+
+                    // Initialize currect date for display
+                    $currentDate = '';
+
+                    // Check if there is/are any tasks scheduled
+                    if ($todo_tasks_query->num_rows > 0) {
+                        // Display task details
+                        while ($row = $todo_tasks_query->fetch_assoc()) {
+                            if ($row['todo_date'] !== $currentDate) {
+                                $currentDate = $row['todo_date'];
+                                echo "<div id='schedule-separator' class='assessment-separator'>";
+                                echo "<span id='date' class='date'> " . $currentDate . "</span>";
+                                echo "<hr class='separator-line'>";
+                                echo "</div>";
+                            }
+
+                            echo "<div class='schedule-item'>";
+                            echo "<h3>" . htmlspecialchars($row['todo_text']) . "</h3>";
+                            echo "<div class='btns'>";
+                            echo "<button 
+                                class='delete' 
+                                id='delete-todo'
+                                data-value='" .htmlspecialchars($row['todo_id']) . "'>
+                                <i class='fas fa-trash-alt'></i> 
+                                </button>";
+                            echo "</div>";
+                            echo "</div>";
+                        }
+                    }
+                    ?>
+                </div>
             </div>
         </div>
-        
+
         <script>
-            const todoInput = document.getElementById('todo-input');
-            const todoAddBtn = document.getElementById('todo-add-btn');
-            const todoList = document.getElementById('todo-list');
+            const scheduledDates = <?php echo json_encode($schedules); ?>;
 
-            // Load todos from localStorage
-            loadTodos();
+            // Function to add scheduled to-do task
+            document.getElementById("todo-add-btn").onclick = function(e) {
+                e.preventDefault();
 
-            // Add todo on button click or Enter key press
-            todoAddBtn.addEventListener('click', addTodo);
-            todoInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    addTodo();
+                const today = new Date();
+
+                if (!selectedDate) {
+                    selectedDate = `${currYear}-${currMonth + 1}-${date.getDate()}`;
+                    console.log("set the date to today's date: ", selectedDate);
+                } else {
+                    if (selectedDate < today) {
+                        alert('Make sure to pick a date that is either today or in the upcoming days.'); // Show error message
+                        return;
+                    }
                 }
+
+                // Gather data needed
+                const student_id = <?php echo $_SESSION['login_id']?> ;
+                const todo_text = document.getElementById("todo-input").value;
+
+                console.log("Selected Date: ", selectedDate);
+                console.log("Student ID: ", student_id);
+                console.log("To-Do Text: ", todo_text);
+
+                // Send data to save_todo.php via AJAX
+                $.ajax({
+                    url: 'save_todo.php',
+                    method: 'POST',
+                    data: {
+                        todo_date: selectedDate,
+                        student_id: student_id,
+                        todo_text: todo_text
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        if (response === 'success') {
+                            location.reload();
+                        } else if (response === 'error') {
+                            alert('Failed to add to-do task. Please try again');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while trying to save the to-do task. Please try again');
+                    }
+                })
+            }
+
+            // Function to delete task
+            $(".btns").on("click", ".delete", function(e) {
+                e.preventDefault();
+                const todo_id = $(this).data('value');
+
+                console.log("To-Do ID: ", todo_id);
+
+                // Send data to save_todo.php via AJAX
+                $.ajax({
+                    url: 'delete_todo.php',
+                    method: 'POST',
+                    data: { todo_id: todo_id },
+                    success: function(response) {
+                        console.log(response);
+                        if (response === 'success') {
+                            location.reload();
+                        } else if (response === 'error') {
+                            alert('Failed to delete to-do task. Please try again');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while trying to delete the to-do task. Please try again');
+                    }
+                })
             });
-
-            function addTodo() {
-                const todoText = todoInput.value.trim();
-                if (todoText !== '') {
-                    createTodoItem(todoText);
-                    todoInput.value = '';
-                    saveTodos();
-                }
-            }
-
-            function createTodoItem(text) {
-                const todoItem = document.createElement('li');
-                const todoLabel = document.createElement('label');
-                const todoButtons = document.createElement('div');
-                const deleteBtn = document.createElement('button');
-
-                todoLabel.textContent = text;
-                deleteBtn.classList.add('delete');
-
-                const trashIcon = document.createElement('i');
-                trashIcon.classList.add('fas', 'fa-trash-alt');
-                deleteBtn.appendChild(trashIcon);
-
-                deleteBtn.addEventListener('click', () => {
-                    deleteTodo(todoItem);
-                });
-
-                todoButtons.classList.add('btns');
-                todoButtons.appendChild(deleteBtn);
-
-                todoItem.appendChild(todoLabel);
-                todoItem.appendChild(todoButtons);
-                todoList.appendChild(todoItem);
-            }
-
-            function deleteTodo(item) {
-                todoList.removeChild(item);
-                saveTodos();
-            }
-
-            function saveTodos() {
-                const todos = Array.from(todoList.children).map(item => item.firstChild.textContent);
-                localStorage.setItem('todos', JSON.stringify(todos));
-            }
-
-            function loadTodos() {
-                const todos = JSON.parse(localStorage.getItem('todos')) || [];
-                todos.forEach(todo => {
-                    createTodoItem(todo);
-                });
-            }
         </script>
     </body>
 </html>
