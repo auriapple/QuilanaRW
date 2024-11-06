@@ -127,7 +127,8 @@ body {
 }
 .dashboard-requests::-webkit-scrollbar,
 .recent-scrollable::-webkit-scrollbar,
-.requests::-webkit-scrollbar {
+.requests::-webkit-scrollbar,
+.todo-list::-webkit-scrollbar {
     display: none;
 }
 
@@ -278,7 +279,7 @@ td .btns,
 /* Dashboard To-Do List */
 .dashboard-todo {
     grid-column: 2 / 3;
-    grid-row: 3 / 4;
+    grid-row: 3 / 7;
     border-radius: 20px;
     border: 1px solid #EEEEEE;
     box-sizing: border-box;
@@ -300,6 +301,7 @@ td .btns,
 
 .todo-input-container {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 10px;
 }
@@ -307,35 +309,50 @@ td .btns,
 .todo-input-container input {
     width: 200px;
     height: 40px;
-    border: 1px solid #EEEEEE;
-    border-radius: 8px;
+    border: 1px solid #e9b422;
+    border-radius: 10px;
     padding: 0 10px;
     font-size: 16px;
+}
+
+.todo-input-container input:hover {
+    border: 2px solid #e9b422;
+}
+
+.todo-input-container input:focus {
+    border-color: #e9b422;
+    box-shadow: 0 0 8px rgba(235, 221, 103, 0.75);
+    outline: none;
 }
 
 .todo-input-container button {
     width: 90px;
     height: 40px;
-    border-radius: 8px;
-    border: none;
-    background-color: #87ffb0;
-    color: #2f8113;
+    border-radius: 10px;
+    outline: none;
+    border: none !important;
+    background-image: linear-gradient(to right, #e9cb60, #e6be2f);
+    background-color: #dbad07;
     font-size: 16px;
-    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
 .todo-input-container button:hover {
-    background-color: #62d08f;
+    background-color: #dbad07;
+}
+
+.todo-input-container:focus,
+.todo-input-container:active {
+    border: none !important;
+    outline: none !important;
 }
 
 .todo-list {
     list-style-type: none;
     padding: 0;
-    margin: 0;
+    margin: 10px 0 0 0;
     overflow-y: auto;
-    max-height: 200px; 
+    height: 100%; 
 }
 
 .todo-list li {
@@ -398,7 +415,8 @@ td .btns,
     .dashboard-summary,
     .dashboard-requests,
     .recent-assessments,
-    .dashboard-calendar {
+    .dashboard-calendar,
+    .dashboard-todo {
         margin: 10px 0;
     }
     .dashboard-requests,
