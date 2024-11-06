@@ -47,10 +47,7 @@
                             </div>
 
                             <input type="submit" value="Sign In" class="sign-btn" />
-                            <p class="text">
-                                Forgotten your password or login details?
-                                <a href="#">Get help</a> signing in
-                            </p>
+                            
                         </div>
                     </form>
                 </div>
