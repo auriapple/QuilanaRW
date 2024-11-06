@@ -407,7 +407,7 @@ td .btns,
     }
     .dashboard-calendar {
         min-height: 300px;
-        min-width: 370px;
+        min-width: 300px;
     }
     .dashboard-container::-webkit-scrollbar {
         display: none;
