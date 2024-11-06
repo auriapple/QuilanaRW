@@ -422,7 +422,8 @@ td .btns,
         margin: 10px 0;
     }
     .dashboard-requests,
-    .recent-assessments {
+    .recent-assessments,
+    .dashboard-todo {
         min-height: 300px;
     }
     .dashboard-calendar {

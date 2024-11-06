@@ -241,6 +241,8 @@ while ($row = $todo_query->fetch_assoc()) {
                             echo "</div>";
                             echo "</div>";
                         }
+                    } else {
+                        echo "<p class='no-assessments'>You have no scheduled tasks!</p>";
                     }
                     ?>
                 </div>
