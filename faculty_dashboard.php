@@ -25,6 +25,13 @@ if (!isset($_SESSION['login_user_type'])) {
         <div class="content-wrapper dashboard-container">
             <!-- Summary -->
             <div class="dashboard-summary">
+                <?php 
+                    $name_query = $conn->query("
+                        SELECT firstname FROM faculty WHERE faculty_id = '".$_SESSION['login_id']."'
+                    ");
+                    $name = $name_query->fetch_assoc();
+                    $firstname = $name['firstname'];
+                ?>
                 <h1> Welcome, <?php echo $firstname ?> </h1>
                 <h2> Summary </h2>
                 <div class="cards">
