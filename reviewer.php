@@ -7,74 +7,110 @@
     <title>Reviewer | Quilana</title>
     <link rel="stylesheet" href="meatballMenuTest/meatball.css">
     <link rel="stylesheet" href="assets/css/classes.css">
-
+<style>
+     @media screen and (max-width: 768px) {
+        #delete-reviewer-modal-content {
+            width: 90%;
+            max-width: 45vh;
+            padding: 30px 15px;
+        }
+    
+        #delete-reviewer-title {
+            font-size: 28px;
+        }
+    
+        #delete-message {
+            font-size: 14px;
+        }
+    
+    }
+    
+    @media screen and (max-width: 480px) {
+        #delete-reviewer-modal-content {
+            width: 100%;
+            height: auto;
+            padding: 30px;
+        }
+    
+        #delete-reviewer-title {
+            font-size: 30x;
+        }
+    
+        #delete-message {
+            font-size: 16px;
+        }
+    }
+</style>
 </head>
 <body>
     <?php include('nav_bar.php') ?>
 
     <div class="content-wrapper">
-        <!-- Header Container -->
-        <div class="add-course-container">
-            <button class="secondary-button" id="add_reviewer_button">Add Reviewer</button>
-            <form class="search-bar" action="#" method="GET">
-                <input type="text" name="query" placeholder="Search" required>
-                <button type="submit"><i class="fa fa-search"></i></button>
-            </form>
-        </div>
-
-        <div class="tabs-container">
-            <ul class="tabs">
-                <li class="tab-link active" data-tab="courses-tab">Reviewer</li>
-                <li class="tab-link" id="classes-tab-link" style="display: none;" data-tab="classes-tab">Reviewer Details</li>
-            </ul>
-        </div>
-
-        <div id="courses-tab" class="tab-content active">
-            <div class="course-container">
-                <?php
-                $qry = $conn->query("SELECT * FROM rw_reviewer WHERE student_id = '".$_SESSION['login_id']."' ORDER BY reviewer_name ASC");
-                if ($qry->num_rows > 0) {
-                    while ($row = $qry->fetch_assoc()) {
-                        $reviewer_id =  $row['reviewer_id'];
-                    ?>
-                        <div class="course-card">
-                            <div class="course-card-body">
-                                <div class="meatball-menu-container">
-                                    <button class="meatball-menu-btn">
-                                        <i class="fas fa-ellipsis-v"></i>
-                                    </button>
-                                    <div class="meatball-menu">
-                                        <div class="arrow-up"></div>
-                                        <a href="#" class="edit_reviewer" data-id="<?php echo $reviewer_id ?>"><span class="material-symbols-outlined">Edit</span>Edit</a>
-                                        <a href="#" class="remove_reviewer" data-id="<?php echo $reviewer_id ?>"><span class="material-symbols-outlined">delete</span>Delete</a>
-                                        <a href="#" class="share_reviewer" data-id="<?php echo $reviewer_id ?>" data-type="<?php echo $row['reviewer_type']; ?>" ><span class="material-symbols-outlined">key</span>Get Code</a>
-                                    </div>
-                                </div>
-                                <div class="course-card-title"><?php echo $row['reviewer_name'] ?></div>
-                                <div class="course-card-text">
-                                    Topic: <?php echo $row['topic'] ?><br>
-                                    Type: <?php echo $row['reviewer_type'] == 1 ? 'Test Reviewer' : 'Flashcard Reviewer'  ?>
-                                </div>
-                                <div class="course-actions">
-                                    <a class="tertiary-button" id="view_reviewer_details" 
-                                    href="manage_reviewer.php?reviewer_id=<?php echo $reviewer_id ?>" type="button"> Manage</a>                                
-                                    <button class="main-button take-reviewer" 
-                                        id="take_reviewer" 
-                                        data-id="<?php echo $row['reviewer_id']; ?>" 
-                                        data-type="<?php echo $row['reviewer_type']; ?>" 
-                                        type="button">
-                                        Take Reviewer
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    <?php }
-                } else {
-                    echo "<p class='no-assessments'>No reviewers created yet</p>";
-                } ?>
-                </div>
+                <!-- Header Container -->
+            <div class="add-course-container">
+                <button class="secondary-button" id="add_reviewer_button">Add Reviewer</button>
+                <form class="search-bar" action="#" method="GET">
+                    <input type="text" name="query" placeholder="Search" required>
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
             </div>
 
+            <div class="tabs-container">
+                <ul class="tabs">
+                    <li class="tab-link active" data-tab="courses-tab">Reviewer</li>
+                    <li class="tab-link" id="classes-tab-link" style="display: none;" data-tab="classes-tab">Reviewer Details</li>
+                </ul>
+            </div>
+
+        <div class="scrollable-content">
+            <div id="courses-tab" class="tab-content active">
+                <div class="course-container">
+                    <?php
+                    $qry = $conn->query("SELECT * FROM rw_reviewer WHERE student_id = '".$_SESSION['login_id']."' ORDER BY reviewer_name ASC");
+                    if ($qry->num_rows > 0) {
+                        while ($row = $qry->fetch_assoc()) {
+                            $reviewer_id =  $row['reviewer_id'];
+                        ?>
+                            <div class="course-card">
+                                <div class="course-card-body">
+                                    <div class="meatball-menu-container">
+                                        <button class="meatball-menu-btn">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="meatball-menu">
+                                            <div class="arrow-up"></div>
+                                            <a href="#" class="edit_reviewer" data-id="<?php echo $reviewer_id ?>"><span class="material-symbols-outlined">Edit</span>Edit</a>
+                                            <a href="#" class="remove_reviewer" data-id="<?php echo $reviewer_id ?>"><span class="material-symbols-outlined">delete</span>Delete</a>
+                                            <a href="#" class="share_reviewer" data-id="<?php echo $reviewer_id ?>" data-type="<?php echo $row['reviewer_type']; ?>" ><span class="material-symbols-outlined">key</span>Get Code</a>
+                                        </div>
+                                    </div>
+                                    <div class="course-card-title"><?php echo $row['reviewer_name'] ?></div>
+                                    <div class="course-card-text">
+                                        Topic: <?php echo $row['topic'] ?><br>
+                                        Type: <?php echo $row['reviewer_type'] == 1 ? 'Test Reviewer' : 'Flashcard Reviewer'  ?>
+                                    </div>
+                                    <div class="course-actions">
+                                        <a class="tertiary-button" id="view_reviewer_details" 
+                                        href="manage_reviewer.php?reviewer_id=<?php echo $reviewer_id ?>" type="button"> Manage</a>                                
+                                        <button class="main-button take-reviewer" 
+                                            id="take_reviewer" 
+                                            data-id="<?php echo $row['reviewer_id']; ?>" 
+                                            data-type="<?php echo $row['reviewer_type']; ?>" 
+                                            type="button">
+                                            Take Reviewer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php }
+                    } else {
+                        echo "<p class='no-assessments'>No reviewers created yet</p>";
+                    } ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
             <div class="popup-overlay" id="add-edit-reviewer-popup">
                 <div class="popup-content" id="add-edit-reviewer-content" role="document">
                     <button class="popup-close">&times;</button>

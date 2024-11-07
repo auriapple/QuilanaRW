@@ -70,7 +70,7 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
                 <!-- Results will be dynamically put here -->
             </div>
             <div class="popup-buttons">
-                <button id="retake" class="secondary-button" onclick="retakeQuiz()">Retake Quiz</button>
+                <button id="retake" class="secondary-button retake-button" onclick="retakeQuiz()">Retake</button>
             </div>
         </div>
     </div>
