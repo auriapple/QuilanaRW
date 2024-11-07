@@ -93,7 +93,7 @@ $questions_query = $conn->query("SELECT * FROM rw_questions WHERE reviewer_id = 
                     </ul>
                 </div>
 
-                <div class="questions-container">
+                <div class="questions-container1">
                     <?php
                     $question_number = 1;
                     while ($question = $questions_query->fetch_assoc()) {
