@@ -5,10 +5,10 @@
 <link rel="stylesheet" ref="assets/css/dataTables.bootstrap4.min.css">
 <!--link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" /-->
 <link rel="stylesheet" ref="assets/css/select2.min.css">
-<link rel="stylesheet" href="fontawesome/css/all.min.css">
-<link rel="stylesheet" href="fontawesome1/css/all.min.css">
-<link rel="stylesheet" href="material-symbols/css/material-symbols.css">
-<link rel="stylesheet" href="sweetalert2/sweetalert2.min.css">
+<link rel="stylesheet" href="/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="/fontawesome1/css/all.min.css">
+<link rel="stylesheet" href="/material-symbols/css/material-symbols.css">
+<link rel="stylesheet" href="/sweetalert2/sweetalert2.min.css">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="stylesheet" href="assets/css/custom-tables.css">
 
