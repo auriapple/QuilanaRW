@@ -19,9 +19,9 @@
     <div class="content-wrapper">
         <!-- Header Container -->
         <div class="add-course-container">
-            <form class="search-bar" action="#" method="GET">
-                <input type="text" name="query" placeholder="Search" required>
-                <button type="submit"><i class="fa fa-search"></i></button>
+            <form class="search-bar">
+                <input id="search-input" type="text" name="query" placeholder="Search" required>
+                <button><i class="fa fa-search"></i></button>
             </form>
         </div>
 
@@ -119,6 +119,37 @@
                 });
                 updateButtons();
             });
+
+            const studentId = <?php echo json_encode($_SESSION['login_id']); ?>;
+
+            // Search functionality
+            $('.search-bar').submit(function(e) {
+                e.preventDefault();
+                performSearch();
+            });
+
+            $('.search-bar input[name="query"]').on('input', function() {
+                performSearch();
+            });
+
+            function performSearch() {
+                const query = $('.search-bar input[name="query"]').val();
+
+                $.ajax({
+                    url: 'search_classes.php',
+                    method: 'GET',
+                    data: { 
+                        query: query,
+                        student_id: studentId
+                    },
+                    success: function(response) {
+                        $('#classes-tab').html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Search failed:', error);
+                    }
+                });
+            }
         });
     </script>
 </body>

@@ -42,7 +42,7 @@ while ($row = $todo_query->fetch_assoc()) {
                 <h2> Summary </h2>
                 <div class="cards">
                     <!-- Total Number of Classes -->
-                    <div class="card" style="background-color: #FFE2E5;">
+                    <div class="card" style="background-color: #FFE2E5;" onclick="window.location.href='class_enrolled.php';">
                         <img class="icons" src="image/DashboardCoursesIcon.png" alt="Classes Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalClasses 
@@ -59,7 +59,7 @@ while ($row = $todo_query->fetch_assoc()) {
                         </div>
                     </div>
                     <!-- Total Number of Quizzes -->
-                    <div class="card" style="background-color: #FADEFF"> 
+                    <div class="card" style="background-color: #FADEFF" onclick="window.location.href='reviewer.php';"> 
                         <img class="icons" src="image/DashboardClassesIcon.png" alt="Quizzes Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalQuizzes 
@@ -76,7 +76,7 @@ while ($row = $todo_query->fetch_assoc()) {
                         </div>
                     </div>
                     <!-- Total Number of Flashcards -->
-                    <div class="card" style="background-color: #DCE1FC;"> 
+                    <div class="card" style="background-color: #DCE1FC;" onclick="window.location.href='reviewer.php';"> 
                         <img class="icons" src="image/DashboardExamsIcon.png" alt="Exams Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalFlashcards
@@ -93,7 +93,7 @@ while ($row = $todo_query->fetch_assoc()) {
                         </div>
                     </div>
                     <!-- Total Number of Shared Reviewers -->
-                    <div class="card" style="background-color: #C5F1C5;"> 
+                    <div class="card" style="background-color: #C5F1C5;" onclick="window.location.href='shared.php';"> 
                         <img class="icons" src="image/DashboardSharedIcon.png" alt="Shared Icon">
                         <?php
                         $result = $conn->query("SELECT COUNT(*) as totalShared 
