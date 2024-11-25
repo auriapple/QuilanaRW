@@ -49,9 +49,9 @@
                 <!-- Header Container -->
             <div class="add-course-container">
                 <button class="secondary-button" id="add_reviewer_button">Add Reviewer</button>
-                <form class="search-bar" action="#" method="GET">
-                    <input type="text" name="query" placeholder="Search" required>
-                    <button type="submit"><i class="fa fa-search"></i></button>
+                <form class="search-bar">
+                    <input id="search-input" type="text" name="query" placeholder="Search" required>
+                    <button><i class="fa fa-search"></i></button>
                 </form>
             </div>
 
@@ -247,7 +247,7 @@
                 openReviewerModal('edit', reviewerId);
             });
 
-            $('.take-reviewer').click(function() {
+            $(document).on('click', '.take-reviewer', function() {
                 var reviewerId = $(this).data('id');
                 var reviewerType = $(this).data('type');
 
@@ -519,6 +519,37 @@
                 var activePopup = this.parentElement.parentElement.parentElement.parentElement.id;
                 closePopup(activePopup);
             });
+
+            const studentId = <?php echo json_encode($_SESSION['login_id']); ?>;
+            
+            // Search functionality
+            $('.search-bar').submit(function(e) {
+                e.preventDefault();
+                performSearch();
+            });
+
+            $('.search-bar input[name="query"]').on('input', function() {
+                performSearch();
+            });
+
+            function performSearch() {
+                const query = $('.search-bar input[name="query"]').val();
+
+                $.ajax({
+                    url: 'search_reviewer.php',
+                    method: 'GET',
+                    data: { 
+                        query: query,
+                        student_id: studentId
+                    },
+                    success: function(response) {
+                        $('#courses-tab').html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Search failed:', error);
+                    }
+                });
+            }
         });
     </script>
 </body>

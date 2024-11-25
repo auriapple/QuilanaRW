@@ -775,6 +775,15 @@ body {
     margin-bottom: 10px;
     color: #1E1A43;
 }
+
+.no-records {
+    color: #CDCDCD;
+    text-align: center;
+    font-style: italic;
+    width: 100%;
+    grid-column: 1 / -1;
+}
+
 .question p {
     margin: 0px;
 }

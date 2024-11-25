@@ -95,7 +95,7 @@
             updateButtons();
 
             // View Class Details
-            $('[id^=viewClassDetails_]').click(function() {
+            $(document).on('click', '[id^=viewClassDetails_]', function() {
                 var class_id = $(this).data('id');
                 var class_name = $(this).closest('.class-card').find('.class-card-title').text();
 
