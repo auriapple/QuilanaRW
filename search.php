@@ -59,7 +59,8 @@ if ($type == 'courses') {
             </div>';
         }
     } else {
-        $output = '<div class="no-records">No programs found matching your search.</div>';
+        $output = "<p class='no-assessments'>No programs found matching your search.</p>";
+
     }
     
 } else {
@@ -118,7 +119,7 @@ if ($type == 'courses') {
             </div>';
         }
     } else {
-        $output = '<div class="no-records">No classes found matching your search.</div>';
+        $output = "<p class='no-assessments'>No classes found matching your search.</p>";
     }
 }
 

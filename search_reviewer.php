@@ -68,7 +68,7 @@ if ($result->num_rows > 0) {
         <?php
     }
 } else {
-    echo '<div class="no-records">No reviewers found matching your search</div>';
+    echo "<p class='no-assessments'>No reviewers found matching your search.</p>";
 }
 echo '</div>';
 ?>

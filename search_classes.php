@@ -41,7 +41,8 @@ if (isset($_GET['query']) && isset($_GET['student_id'])) {
             <?php
         }
     } else {
-        echo '<div class="no-records">No classes found matching your search</div>';
+        echo "<p class='no-assessments'>No classes found matching your search.</p>";
+
     }
     echo '</div>';
 }
